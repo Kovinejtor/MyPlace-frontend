@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { Button } from 'flowbite-svelte';
     import { page } from '$app/stores';
+    import { Navbar, Card, NavBrand, NavLi, NavUl, NavHamburger, ImagePlaceholder, Skeleton, TextPlaceholder } from 'flowbite-svelte';
   
   
     // Define the book data
@@ -44,25 +45,121 @@
     });
   </script>
   
-  
-  
-  
-  <div class="mt-20 mb-8">
-    <h1>SvelteKit Page</h1>
-    
-    <form on:submit|preventDefault={handleSubmit}>
-      <label for="name">Name:</label>
-      <input type="text" bind:value={bookData.name} id="name" required />
+  <div>
+    <h1 style="margin-top: 100px;" class="text-2xl text-white ml-14">Type of place</h1>
+    <div class="flex flex-wrap justify-center">
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/apartments.jpg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Apartments
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/hotels.jpg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Hotels
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/villas.jpeg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Villas
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/resorts.jpeg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Resorts
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/hostels.jpg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Hostels
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/motels.jpeg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Motels
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/cabins.jpeg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Cabins
+        </div>
+      </div>
+      <div class="relative max-w-[200px] max-h-[155px] mt-4 mr-4">
+        <img src="/src/lib/assets/cottages.jpg" class="w-full h-full rounded-lg" alt="product 1"/>
+        <div class="absolute top-0 left-0 p-2 text-xl font-bold text-yale">
+          Cottages
+        </div>
+      </div>
       
-      <label for="author">Author:</label>
-      <input type="text" bind:value={bookData.author} id="author" required />
-      
-      <label for="page_number">Page Number:</label>
-      <input type="number" bind:value={bookData.page_number} id="page_number" required />
-  
-      <Button type="submit" color="blue">Add book</Button>
-    </form>
+    </div>
   </div>
+  
+
+  <div class="flex flex-wrap">
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+    <Card style="margin-top: 100px;" class="m-4">
+      Nes
+    </Card>
+  </div>
+  
+
+ 
   
   
   

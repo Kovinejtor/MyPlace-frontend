@@ -1,4 +1,4 @@
-/* @type {import('tailwindcss').Config}*/
+/** @type {import('tailwindcss').Config}*/
 const config = {
 	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'],
   
@@ -21,7 +21,10 @@ const config = {
 			700: '#EB4F27',
 			800: '#CC4522',
 			900: '#A5371B'
-		  }
+		  },
+		'berkeley-blue': '#13315C',
+		'yale-blue': '#134074',
+		'oxford-blue': '#0B2545'
 		}
 	  }
 	}
