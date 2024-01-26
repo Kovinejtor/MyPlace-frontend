@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import { Label, Input } from 'flowbite-svelte';
   import { Card } from 'flowbite-svelte';
   import { Button } from 'flowbite-svelte';
-  import { EnvelopeSolid, LockSolid } from 'flowbite-svelte-icons';
+  import { EnvelopeSolid, LockSolid, EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import '../app.pcss';
   
   /*
@@ -12,10 +12,15 @@
     #FFFFFF
   */
 
+
+ 
+
   let logInData = {
   email: "",
   password: ""
   };
+
+  let show = false;
 
   const checkLogin = async () => {
     try {
@@ -60,16 +65,28 @@
           <EnvelopeSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
         </Input>
       </div>
-      <div class="mb-12">
-        <Label for="default-input" class="block mb-2">Password</Label>
-        <Input id="default-input" bind:value={logInData.password} placeholder="Enter your password">
-          <LockSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-        </Input>
+      <div class="mb-4">
+        <Label class="block mb-2">Password</Label>
+        <div class="relative">
+          <Input id="password" type={show ? 'text' : 'password'} bind:value={logInData.password} placeholder="Enter your password">
+            <LockSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </Input>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+            <button on:click={() => (show = !show)}>
+              {#if show}
+                <EyeOutline class="w-6 h-6" />
+              {:else}
+                <EyeSlashOutline class="w-6 h-6" />
+              {/if}
+            </button>
+          </div>
+        </div>
       </div>
   
       <Button href="app" on:click={handleSubmit} type="submit" color="blue">Log in</Button>
 
-      <a href="register" class="mt-5 font-medium text-blue-600 dark:text-blue-500 hover:underline">Register</a>
+      <a href="register" class="mt-6 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Don't have an account. Register</a>
+      <p class="mt-3 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Forgot the password?</p>
     </Card>
 </div>
 

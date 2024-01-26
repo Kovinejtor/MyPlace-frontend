@@ -124,63 +124,6 @@
     </div>
   </div>
   
-
-  <div class="flex flex-wrap">
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-    <Card style="margin-top: 100px;" class="m-4">
-      Nes
-    </Card>
-  </div>
   
 
  
