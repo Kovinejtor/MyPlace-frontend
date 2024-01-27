@@ -30,42 +30,42 @@
       </div>
       
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/apartments.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/apartments.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Apartments</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/hotels.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/hotels.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Hotels</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/villas.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/villas.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Villas</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/resorts.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/resorts.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Resorts</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/hostels.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/hostels.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Hostels</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/motels.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/motels.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Motels</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/cabins.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/cabins.jpeg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Cabins</p>
       </div>
 
       <div class="relative flex items-center justify-center">
-        <img src="/src/lib/assets/cottages.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
+        <img src="/cottages.jpg" class="w-72 h-48 rounded-lg" alt="product 1"/>
         <p class="absolute top-3 left-12 text-white font-bold text-2xl" style="-webkit-text-stroke: 1px gray;">Cottages</p>
       </div>
     </div>

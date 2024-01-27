@@ -54,7 +54,7 @@
 
 <div class="h-screen bg-berkeley-blue w-full flex justify-center items-center">
     <div class="mr-8">
-      <img src="/src/lib/assets/main.jpg" class="object-cover h-96 w-100 rounded-lg" alt="product 1"/>
+      <img src="/main.jpg" class="object-cover h-96 w-100 rounded-lg" alt="product 1"/>
     </div>
     
     <Card padding="xl">
