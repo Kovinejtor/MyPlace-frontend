@@ -1,9 +1,24 @@
-<script>
+<script lang="ts">
     import {Input} from 'flowbite-svelte';
     import {HomeSolid, CalendarMonthSolid, UsersSolid } from 'flowbite-svelte-icons';
+    import { onMount } from 'svelte';
+    import { app, storage } from '../../firebase';
+
+    onMount(() => {
+    // Log information to the console to verify Firebase is initialized
+    console.log('Firebase app initialized:', app);
+    console.log('Firebase storage initialized:', storage);
+
+    // You can also perform other Firebase operations here, such as retrieving data or uploading files
+    // For example, if you're using Firebase Storage:
+    // import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+    // const storage = getStorage(app);
+    // const storageRef = ref(storage, 'path/to/your/image.jpg');
+    // getDownloadURL(storageRef).then(url => console.log('Image URL:', url));
+  });
   </script>
   
-  <div>
+  <div class="pt-10 pb-10" style="margin-top: 100px;">
     <div class="grid grid-cols-10 gap-3 mt-1 p-3 bg-berkeley-blue rounded">
       <div class="col-start-2 col-span-2">
         <Input id="email" type="email" placeholder="Search by city or country">

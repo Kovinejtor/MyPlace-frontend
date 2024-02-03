@@ -13,7 +13,7 @@
       </NavBrand>
       <NavHamburger />
       <NavUl>
-        <NavLi href="/" active={true}  class="text-white">Home</NavLi>
+        <NavLi href="/app" active={true}  class="text-white">Home</NavLi>
         <NavLi href="/app/myPlaces"  class="text-white">My Places</NavLi>
         <NavLi href="/app/journeyLog"  class="text-white">Journey Log</NavLi>
         <NavLi href="/app/account"  class="text-white">Account</NavLi>
@@ -23,7 +23,7 @@
   </div>
 
   <div class="flex px-4 min-h-screen w-full bg-yale-blue">
-    <main class="w-full mx-auto h-full mt-32 mb-24">
+    <main class="w-full mx-auto h-full">
       <slot />
     </main>
   </div>

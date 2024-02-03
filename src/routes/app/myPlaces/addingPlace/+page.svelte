@@ -1,5 +1,29 @@
 <script lang="ts">
     import {Card, Button, Label, Select, Input, Textarea, Fileupload, Listgroup, ListgroupItem, Checkbox  } from 'flowbite-svelte';
+    import { onMount } from 'svelte';
+    import { v4 as uuidv4 } from 'uuid';
+    import { app, storage } from '../../../../firebase';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+    let agree: boolean = false;
+    let newPlace = {
+    type: "",
+    name: "",
+    country: "",
+    city: "",
+    adress: "",
+    maxPeople: 1,
+    beds: 1,
+    adults: 1,
+    children: 0,
+    animals: "",
+    parking: "",
+    minNight: 1,
+    price: "",
+    description: "",
+    folder: "",
+    images: [] as File[],
+  };
 
     let countries = [
         { value: 'Apartment', name: 'Apartment' },
@@ -42,23 +66,35 @@
 
     let files: FileList;
 
-  let imagePreviews: { id: number; src: string }[] = [];
+    let imagePreviews: { id: number; src: string; file: File }[] = [];
+  let previewIdCounter = 0;
 
   function handleFileUpload() {
-  if (files) {
-    const newPreviews = Array.from(files).map((file, i) => ({
-      id: imagePreviews.length + i,
-      src: URL.createObjectURL(file),
-    }));
+    if (files) {
+      const newPreviews = Array.from(files).map((file) => ({
+        id: previewIdCounter++,
+        src: URL.createObjectURL(file),
+        file: file,
+      }));
 
-    imagePreviews = [...imagePreviews, ...newPreviews];
+      imagePreviews = [...imagePreviews, ...newPreviews];
 
-    newPlace.images = [...newPlace.images, ...Array.from(files)] as File[];
+      newPlace.images = [...newPlace.images, ...newPreviews.map((preview) => preview.file)];
+    }
   }
-}
 
   function removeImage(id: number) {
-    imagePreviews = imagePreviews.filter((img) => img.id !== id);
+    // Find the removed image by ID in imagePreviews
+    const removedImage = imagePreviews.find((img) => img.id === id);
+
+    // Check if removedImage is defined before proceeding
+    if (removedImage) {
+      // Filter out the removed image from imagePreviews
+      imagePreviews = imagePreviews.filter((img) => img.id !== id);
+
+      // Filter out the removed file from newPlace.images
+      newPlace.images = newPlace.images.filter((file) => file !== removedImage.file);
+    }
   }
 
   function openFileInput() {
@@ -66,80 +102,101 @@
     fileInput?.click();
   }
 
-  let newPlace = {
-    type: "",
-    name: "",
-    country: "",
-    city: "",
-    adress: "",
-    maxPeople: 1,
-    beds: 1,
-    adults: 1,
-    children: 0,
-    animals: "",
-    parking: "",
-    minNight: 1,
-    price: "",
-    description: "",
-    images: [] as File[],
-  };
+  
+  
 
-  const addPlace = async () => {
+  let valid: boolean = false;
+
+const addPlace = async () => {
     try {
-        const formData = new FormData();
-        formData.append('newPlace', JSON.stringify(newPlace));
+      const folderName = uuidv4();
+      newPlace.folder = folderName;
 
-        newPlace.images.forEach((file, index) => {
-            formData.append(`image${index}`, file); // Ensure 'file' is a valid File object
-        });
+    const imageUrls: string[] = await Promise.all(
+      newPlace.images.map(async (image) => {
+        const storageRef = ref(storage, `images/${folderName}/${image.name}`);
+        const snapshot = await uploadBytes(storageRef, image);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        return downloadUrl;
+      })
+    );
 
-        console.log(newPlace);
+      const response = await fetch('http://127.0.0.1:8000/addPlace/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPlace),
+      });
 
-        const response = await fetch('http://127.0.0.1:8000/addPlace/', {
-            method: 'POST',
-            body: formData, // No Content-Type header needed
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Place added successfully:', result);
-        } else {
-            console.error('Failed to add place:', response.statusText);
-        }
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Place created successfully:', result);
+      } else {
+        console.error('Failed to create place:', response.statusText);
+      }
     } catch (error) {
-        console.error('Error adding place:', error);
+      console.error('Error creating place:', error);
     }
-};
+  };
 
   const handleSubmit = () => {
     addPlace();
   };
+
+  const isFormValid = () => {
+    if (
+        newPlace.type.trim() !== "" && 
+        newPlace.name.trim() !== "" &&
+        newPlace.country.trim() !== "" &&
+        newPlace.city.trim() !== "" &&
+        newPlace.adress.trim() !== "" &&
+        newPlace.animals.trim() !== "" &&
+        newPlace.parking.trim() !== "" &&
+        newPlace.price.trim() !== "" &&
+        newPlace.description.trim() !== "" &&
+        newPlace.images.length >= 5
+    ) {
+        valid = true;
+    }
+    else{
+        valid = false;
+    }
+
+    console.log(newPlace.images);
+    console.log(newPlace.images.length);
+    console.log(valid);
+};
+
+ function changeAgree(){
+    agree = !agree;
+ }
 </script>
  
 
-<div class="h-screen w-full flex justify-center items-center">
+<div class=" flex justify-center items-center pt-10 pb-10 mt-14">
     <div class="bg-berkeley-blue text-white w-1/2 rounded-lg p-5">
         <p class="text-center mt-8 text-xl font-bold">If you want to add a place to the catalog you need to fill this form and accept the terms of service.</p>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 m-8 items-center text-center">
             <div class="items-center text-center">
                 <Label>
-                    <Select items={countries} bind:value={newPlace.type} placeholder="Type of place"/>
+                    <Select items={countries} bind:value={newPlace.type} placeholder="Type of place" on:change={() => isFormValid()}/>
                 </Label>
             </div>
             <div class="items-center text-center ">
-                <Input id="email" type="email" bind:value={newPlace.name} placeholder="Name for the place">
+                <Input id="email" type="email" bind:value={newPlace.name} placeholder="Name for the place" on:input={() => isFormValid()}>
                 </Input>
             </div>
             <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.country} placeholder="Country">
+                <Input id="email" type="email" bind:value={newPlace.country} placeholder="Country" on:input={() => isFormValid()}>
                 </Input>
             </div>
             <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.city} placeholder="City">
+                <Input id="email" type="email" bind:value={newPlace.city} placeholder="City" on:input={() => isFormValid()}>
                 </Input>
             </div>
             <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.adress} placeholder="Adress">
+                <Input id="email" type="email" bind:value={newPlace.adress} placeholder="Adress" on:input={() => isFormValid()}>
                 </Input>
             </div>
             <div>
@@ -178,12 +235,12 @@
             </div>
             <div class="items-center text-center">
                 <Label>
-                    <Select items={animals} bind:value={newPlace.animals} placeholder="Are animals allowed?"/>
+                    <Select items={animals} bind:value={newPlace.animals} placeholder="Are animals allowed?" on:change={() => isFormValid()}/>
                 </Label>
             </div>
             <div class="items-center text-center">
                 <Label>
-                    <Select items={parking} bind:value={newPlace.parking} placeholder="Is there a parking?"/>
+                    <Select items={parking} bind:value={newPlace.parking} placeholder="Is there a parking?" on:change={() => isFormValid()}/>
                 </Label>
             </div>
             <div>
@@ -195,7 +252,7 @@
                 </form>
             </div>
             <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.price} placeholder="Price per night">
+                <Input id="email" type="email" bind:value={newPlace.price} placeholder="Price per night" on:input={() => isFormValid()}>
                 </Input>
             </div>
         </div>
@@ -207,7 +264,7 @@
               <button class="bg-blue-500 text-white px-4 py-2 rounded" on:click={openFileInput}>
                 Upload
               </button>
-              <input type="file" id="image-upload" class="hidden" multiple bind:files on:change={handleFileUpload} />
+              <input type="file" id="image-upload" class="hidden" multiple bind:files on:change={handleFileUpload} on:change={() => isFormValid()}/>
             </div>
           
             <div class="grid grid-cols-3 gap-4">
@@ -219,7 +276,7 @@
                   role="button"
                   tabindex={0}
                 >
-                  <button class="bg-white text-gray-800 p-2 rounded-full cursor-pointer" on:click={() => removeImage(id)}>
+                  <button class="bg-white text-gray-800 p-2 rounded-full cursor-pointer" on:click={() => { removeImage(id); isFormValid(); }}>
                     🗑️
                   </button>
                 </div>
@@ -227,11 +284,14 @@
               {/each}
             </div>
           </div>
-        <Textarea {...textareaprops} bind:value={newPlace.description}/>
+        <Textarea {...textareaprops} bind:value={newPlace.description} on:input={() => isFormValid()}/>
         <div class="items-center text-center">
-            <Checkbox class="mt-14 text-white" color="blue" >By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
-            <Button href="/app/myPlaces/addingPlace" on:click={handleSubmit} color="blue" class="mt-8 w-56">Add place</Button>
+            <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
+            {#if valid && agree}
+               <Button href="/app" on:click={handleSubmit} color="blue" class="mt-8 w-56" disabled={!valid}>Add place</Button>
+            {:else}
+                <Button color="blue" class="mt-8 w-56" disabled={!valid || !agree}>Add place</Button>
+            {/if}
         </div>
-
     </div>
 </div>
