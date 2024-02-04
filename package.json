@@ -39,6 +39,8 @@
 	"type": "module",
 	"dependencies": {
 		"firebase": "^10.8.0",
+		"flatpickr": "^4.6.13",
+		"svelte-flatpickr": "^3.3.4",
 		"uuid": "^9.0.1"
 	}
 }

@@ -1,11 +1,53 @@
 <script lang="ts">
     import {Card, Button, Label, Select, Input, Textarea, Fileupload, Listgroup, ListgroupItem, Checkbox  } from 'flowbite-svelte';
-    import { onMount } from 'svelte';
+    import { onMount, afterUpdate  } from 'svelte';
     import { v4 as uuidv4 } from 'uuid';
     import { app, storage } from '../../../../firebase';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+    import flatpickr from 'flatpickr';
+    import 'flatpickr/dist/flatpickr.css';
+    import {CalendarMonthSolid} from 'flowbite-svelte-icons';
 
-    let agree: boolean = false;
+
+  let selectedDate: string = "";
+  let isLastInputFilled: boolean = false;
+  let counter: number = 1;
+  let dateInputs: { id: number; date: string }[] = [];
+
+  const initializeFlatpickr = (selector: string, id: number) => {
+    flatpickr(selector, {
+      mode: "range",
+      minDate: "today",
+      dateFormat: 'd-m-Y',
+      onChange: (selectedDates, dateStr) => {
+        dateInputs = dateInputs.map(input => (input.id === id ? { ...input, date: dateStr } : input));
+      },
+    });
+  };
+
+  onMount(() => {
+    initializeFlatpickr('#datepicker', 0);
+  });
+
+  const addDateInput = () => {
+    const id = dateInputs.length + 1;
+    dateInputs = [...dateInputs, { id, date: "" }];
+    counter+=1;
+
+    setTimeout(() => {
+      const selector = `#datepicker-${id}`;
+      initializeFlatpickr(selector, id);
+    }, 0);
+  };
+
+  $: formattedDates = [selectedDate, ...dateInputs.map(dateInput => dateInput.date)];
+
+  $: {
+    isLastInputFilled = formattedDates.every(date => date !== '') && counter == formattedDates.length;
+  }
+
+
+  let agree: boolean = false;
     let newPlace = {
     type: "",
     name: "",
@@ -22,6 +64,7 @@
     price: "",
     description: "",
     folder: "",
+    dates: "",
     images: [] as File[],
   };
 
@@ -84,15 +127,10 @@
   }
 
   function removeImage(id: number) {
-    // Find the removed image by ID in imagePreviews
     const removedImage = imagePreviews.find((img) => img.id === id);
 
-    // Check if removedImage is defined before proceeding
     if (removedImage) {
-      // Filter out the removed image from imagePreviews
       imagePreviews = imagePreviews.filter((img) => img.id !== id);
-
-      // Filter out the removed file from newPlace.images
       newPlace.images = newPlace.images.filter((file) => file !== removedImage.file);
     }
   }
@@ -109,6 +147,9 @@
 
 const addPlace = async () => {
     try {
+      newPlace.dates = formattedDates.join(', ');
+      console.log(newPlace.dates);
+
       const folderName = uuidv4();
       newPlace.folder = folderName;
 
@@ -155,7 +196,8 @@ const addPlace = async () => {
         newPlace.parking.trim() !== "" &&
         newPlace.price.trim() !== "" &&
         newPlace.description.trim() !== "" &&
-        newPlace.images.length >= 5
+        newPlace.images.length >= 5 &&
+        formattedDates[0] != ""
     ) {
         valid = true;
     }
@@ -163,9 +205,9 @@ const addPlace = async () => {
         valid = false;
     }
 
-    console.log(newPlace.images);
-    console.log(newPlace.images.length);
-    console.log(valid);
+    console.log(counter);
+    console.log(formattedDates.length);
+    console.log(formattedDates);
 };
 
  function changeAgree(){
@@ -285,6 +327,32 @@ const addPlace = async () => {
             </div>
           </div>
         <Textarea {...textareaprops} bind:value={newPlace.description} on:input={() => isFormValid()}/>
+
+
+          
+          <h1 class="mt-10">Choose the days when people will be able to make a reservation:</h1>
+
+          <Input on:input={() => isFormValid()} type="text" id="datepicker" bind:value={selectedDate} placeholder="Click here to select a date" class="rounded-md mt-4 mb-2 w-15">
+            <CalendarMonthSolid slot="left"/>
+          </Input>
+
+          {#each dateInputs as { id, date } (id)}
+            <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
+              <CalendarMonthSolid slot="left"/>
+            </Input>
+          {/each}
+
+          <Button color="blue" on:click={addDateInput} class="mt-4" disabled={!isLastInputFilled}>Add more dates</Button>
+          <p class="mt-5">Selected Dates: {#each formattedDates as date, index (date)}
+            {#if index !== 0}, {/if}{date}
+          {/each}</p>
+
+
+
+
+          
+          
+
         <div class="items-center text-center">
             <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
             {#if valid && agree}
