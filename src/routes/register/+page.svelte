@@ -3,19 +3,10 @@
   import { EnvelopeSolid, LockSolid, MobilePhoneSolid, AddressCardSolid, MapPinAltSolid, UserSolid, EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import '../../app.pcss';
 
-  /*
-    #134074
-    #13315C
-    #0B2545
-    #FFFFFF
-  */
-
-  
-
   let show = false;
   let show1 = false;
 
-  let selected : string = "";
+ 
   let genders = [
     { value: 'Male', name: 'Male' },
     { value: 'Female', name: 'Female' }
@@ -25,38 +16,14 @@
   email: "",
   password: "",
   rePassword: "",
-  gender: selected, 
+  gender: "", 
   firstName: "",
   lastName: "",
   country: "",
   phoneNumber: ""
   };
 
-  const createUser = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Account created successfully:', result);
-      } else {
-        console.error('Failed to create account:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error creating account:', error);
-    }
-  };
-
-  const handleSubmit = () => {
-    createUser();
-  };
-
+  
   function isValidEmail(email: string): boolean {
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -95,6 +62,56 @@
   function handlePhoneInput() {
     phoneInputTouched = true;
   }
+
+  let isButtonDisabled: boolean = true;
+
+  function updateButtonStatus() {
+    const isEmailValid = isValidEmail(registrationData.email);
+  const isPasswordValid = isValidPassword(registrationData.password);
+  const isRepeatPasswordValid = isValidRepeatPassword(registrationData.rePassword);
+  const isPhoneValid = isValidPhone(registrationData.phoneNumber);
+
+  // Check if any field in registrationData is an empty string
+  const isEmptyValue = Object.values(registrationData).some(value => value === "");
+
+  // Update isButtonDisabled based on conditions
+  isButtonDisabled = isEmptyValue || !isEmailValid || !isPasswordValid || !isRepeatPasswordValid || !isPhoneValid;
+
+  console.log(isButtonDisabled);
+  console.log(registrationData);
+  }
+
+  const handleSubmit = () => {
+    if (!isButtonDisabled) {
+      window.location.href = '/app';
+      createUser();
+    }
+  };
+
+
+  const createUser = async () => {
+    try {
+      console.log("this", registrationData);
+      const response = await fetch('http://127.0.0.1:8000/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Account created successfully:', result);
+        sessionStorage.setItem('accessToken', JSON.stringify(result));
+      } else {
+        console.log("this", registrationData);
+        console.error('Failed to create account:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error creating account:', error);
+    }
+  };
   </script>
   
   
@@ -107,7 +124,7 @@
             id="email"
             bind:value={registrationData.email}
             placeholder="Enter your email address"
-            on:input={handleEmailInput}
+            on:input={() => { handleEmailInput(); updateButtonStatus(); }}
           >
             <EnvelopeSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
@@ -122,7 +139,7 @@
           <Label class="block mb-2">Password</Label>
           <div class="relative">
             <Input id="password" type={show ? 'text' : 'password'} bind:value={registrationData.password} placeholder="Enter your password"
-              on:input={handlePasswordInput}>
+              on:input={() => { handlePasswordInput(); updateButtonStatus(); }}>
               <LockSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </Input>
             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -148,7 +165,7 @@
           <Label class="block mb-2">Repeat password</Label>
           <div class="relative">
             <Input id="rePassword" type={show1 ? 'text' : 'password'} bind:value={registrationData.rePassword} placeholder="Enter your password"
-              on:input={handleRepeatPasswordInput}>
+              on:input={() => { handleRepeatPasswordInput(); updateButtonStatus(); }}>
               <LockSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </Input>
             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -172,7 +189,7 @@
         <div class="mb-4">
           <Label class="block mb-2">
             Gender
-            <Select class="mt-2" items={genders} bind:value={selected} />
+            <Select class="mt-2" items={genders} bind:value={registrationData.gender} on:change={updateButtonStatus}/>
           </Label>
         </div>
         
@@ -180,25 +197,25 @@
       <Card padding="xl">
         <div class="mb-4">
           <Label class="block mb-2">First name</Label>
-          <Input id="firstName" bind:value={registrationData.firstName} placeholder="Enter you first name">
+          <Input id="firstName" bind:value={registrationData.firstName} placeholder="Enter you first name" on:input={updateButtonStatus}>
             <AddressCardSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
         </div>
         <div class="mb-4">
           <Label class="block mb-2">Last name</Label>
-          <Input id="lastName" bind:value={registrationData.lastName} placeholder="Enter you last name">
+          <Input id="lastName" bind:value={registrationData.lastName} placeholder="Enter you last name" on:input={updateButtonStatus}>
             <AddressCardSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
         </div>
         <div class="mb-4">
           <Label class="block mb-2">Country</Label>
-          <Input id="country" bind:value={registrationData.country} placeholder="Enter you country name">
+          <Input id="country" bind:value={registrationData.country} placeholder="Enter you country name" on:input={updateButtonStatus}>
             <MapPinAltSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
         </div>
         <div class="mb-12">
           <Label class="block mb-2">Phone number</Label>
-          <Input id="phone" bind:value={registrationData.phoneNumber} placeholder="Enter you phone number" on:input={handlePhoneInput}>
+          <Input id="phone" bind:value={registrationData.phoneNumber} placeholder="Enter you phone number" on:input={() => { handlePhoneInput(); updateButtonStatus(); }}>
             <MobilePhoneSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
           {#if phoneInputTouched && !isValidPhone(registrationData.phoneNumber)}
@@ -207,13 +224,6 @@
             </Helper>
           {/if}
         </div>
-        <Button href="/app" on:click={handleSubmit} type="submit" color="blue">Create account</Button>
+        <Button on:click={handleSubmit} disabled={isButtonDisabled} type="submit" color="blue">Create account</Button>
       </Card>
-  </div>
-  
-  
-  
-  
-  
-  
-  
+  </div> 
