@@ -9,10 +9,14 @@
     import {CalendarMonthSolid} from 'flowbite-svelte-icons';
 
 
+    
+
   let selectedDate: string = "";
   let isLastInputFilled: boolean = false;
   let counter: number = 1;
   let dateInputs: { id: number; date: string }[] = [];
+
+  
 
   const initializeFlatpickr = (selector: string, id: number) => {
     flatpickr(selector, {
@@ -27,6 +31,7 @@
 
   onMount(() => {
     initializeFlatpickr('#datepicker', 0);
+    check();
   });
 
   const addDateInput = () => {
@@ -46,9 +51,12 @@
     isLastInputFilled = formattedDates.every(date => date !== '') && counter == formattedDates.length;
   }
 
+ 
+
 
   let agree: boolean = false;
-    let newPlace = {
+
+  let newPlace = {
     type: "",
     name: "",
     country: "",
@@ -65,8 +73,40 @@
     description: "",
     folder: "",
     dates: "",
+    authorEmail: "",
     images: [] as File[],
   };
+
+  async function check() {
+    const accessTokenString = sessionStorage.getItem('accessToken');
+    
+    if (accessTokenString) {
+      const accessToken = JSON.parse(accessTokenString);
+      const access_token = accessToken?.access_token;
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/protected-route/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${access_token}`
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Email of the current user:', result);
+          newPlace.authorEmail = result;
+        } else {
+          console.error('Failed to fetch user information:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching user information:', error);
+      }
+    } else {
+      console.error('Access token not found in sessionStorage.');
+    }
+  }
 
     let countries = [
         { value: 'Apartment', name: 'Apartment' },
@@ -145,6 +185,8 @@
 
   let valid: boolean = false;
 
+  
+
 const addPlace = async () => {
     try {
       newPlace.dates = formattedDates.join(', ');
@@ -205,9 +247,7 @@ const addPlace = async () => {
         valid = false;
     }
 
-    console.log(counter);
-    console.log(formattedDates.length);
-    console.log(formattedDates);
+    console.log(newPlace);
 };
 
  function changeAgree(){

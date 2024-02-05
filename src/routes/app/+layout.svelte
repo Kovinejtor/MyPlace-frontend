@@ -1,8 +1,20 @@
-<script>
+<script lang="ts">
     import '../../app.pcss';
 	import { page } from '$app/stores';
     import { Navbar, NavBrand, NavLi, NavUl, Card, NavHamburger, ImagePlaceholder, Skeleton, TextPlaceholder } from 'flowbite-svelte';
 	$: activeUrl = $page.url.pathname;
+
+  const logout = () => {
+    
+        sessionStorage.removeItem('accessToken');
+
+        if (!sessionStorage.getItem('accessToken')) {
+            console.log('Access token removed successfully');
+            //window.location.href = '/';  
+        } else {
+            console.log('Failed to remove access token');
+        }
+    };
   </script>
   
   <div class="relative px-8 bg-berkeley-blue">
@@ -17,7 +29,7 @@
         <NavLi href="/app/myPlaces"  class="text-white">My Places</NavLi>
         <NavLi href="/app/journeyLog"  class="text-white">Journey Log</NavLi>
         <NavLi href="/app/account"  class="text-white">Account</NavLi>
-        <NavLi href="/"  class="text-white">Log out</NavLi>
+        <NavLi href="/" on:click={() => logout()} class="text-white">Log out</NavLi>
       </NavUl>
     </Navbar>
   </div>
@@ -27,13 +39,3 @@
       <slot />
     </main>
   </div>
-
-  
-  
-
- 
-
-  
-  
-  
-  

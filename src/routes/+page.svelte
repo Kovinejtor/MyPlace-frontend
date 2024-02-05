@@ -5,22 +5,13 @@
   import { EnvelopeSolid, LockSolid, EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import '../app.pcss';
   
-  /*
-    #134074
-    #13315C
-    #0B2545
-    #FFFFFF
-  */
-
-
- 
-
   let logInData = {
   email: "",
   password: ""
   };
 
   let show = false;
+  let loginError: boolean = true;
 
   const checkLogin = async () => {
     try {
@@ -38,16 +29,27 @@
       if (response.ok) {
         const result = await response.json();
         console.log('Logged in successfully:', result);
+        sessionStorage.setItem('accessToken', JSON.stringify(result));
+
+        loginError = true;
+        // If login is successful, you can perform navigation here
       } else {
         console.error('Failed to log in:', response.statusText);
+        loginError = false;
       }
     } catch (error) {
       console.error('Error logging in:', error);
+      loginError = false;
     }
   };
 
-  const handleSubmit = () => {
-    checkLogin();
+  const handleSubmit = async () => {
+    await checkLogin();
+    console.log(loginError);
+    // Only navigate if there is no login error
+    if (loginError) {
+      window.location.href = 'app'; // or use Svelte's router for navigation
+    }
   };
 </script>
 
@@ -83,17 +85,9 @@
         </div>
       </div>
   
-      <Button href="app" on:click={handleSubmit} type="submit" color="blue">Log in</Button>
+      <Button on:click={handleSubmit} type="submit" color="blue">Log in</Button>
 
       <a href="register" class="mt-6 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Don't have an account. Register</a>
       <p class="mt-3 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Forgot the password?</p>
     </Card>
 </div>
-
-
-
-
-
-
-
-
