@@ -6,49 +6,73 @@
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
-    import {CalendarMonthSolid} from 'flowbite-svelte-icons';
+    import {CalendarMonthSolid, EuroSolid} from 'flowbite-svelte-icons';
 
 
     
 
-  let selectedDate: string = "";
+    let selectedDate: string = "";
   let isLastInputFilled: boolean = false;
   let counter: number = 1;
-  let dateInputs: { id: number; date: string }[] = [];
-
-  
+  let dateInputs: { id: number; date: string; price: string }[] = [{ id: 1, date: "", price: "" }];
 
   const initializeFlatpickr = (selector: string, id: number) => {
-    flatpickr(selector, {
-      mode: "range",
-      minDate: "today",
-      dateFormat: 'd-m-Y',
-      onChange: (selectedDates, dateStr) => {
-        dateInputs = dateInputs.map(input => (input.id === id ? { ...input, date: dateStr } : input));
-      },
+    const flatpickrInstance = flatpickr(selector, {
+        mode: "range",
+        minDate: "today",
+        dateFormat: 'd-m-Y',
+        disable: getDisabledDates(id), 
+        onChange: (selectedDates, dateStr) => {
+            dateInputs = dateInputs.map(input => (input.id === id ? { ...input, date: dateStr } : input));
+            console.log(dateInputs);
+            updateDisabledDates(flatpickrInstance, id); 
+        },
     });
-  };
+};
+
+const updateDisabledDates = (instance: any, id: number) => {
+    const disabledDates = getDisabledDates(id);
+    instance.set("disable", disabledDates);
+};
+
+const getDisabledDates = (excludeId: number) => {
+    const disabledDates = dateInputs
+        .filter(input => input.id !== excludeId)
+        .flatMap(input => {
+            if (input.date.includes(' to ')) {
+                const [fromDate, toDate] = input.date.split(' to ');
+                return [{ from: fromDate, to: toDate }];
+            } else {
+                return { from: input.date, to: input.date };
+            }
+        });
+
+    return disabledDates;
+};
+
+
 
   onMount(() => {
-    initializeFlatpickr('#datepicker', 0);
-    check();
+      initializeFlatpickr('#datepicker', 1);
+      check();
   });
 
   const addDateInput = () => {
-    const id = dateInputs.length + 1;
-    dateInputs = [...dateInputs, { id, date: "" }];
-    counter+=1;
+      const id = dateInputs.length + 1;
+      dateInputs = [...dateInputs, { id, date: "", price: "" }];
+      counter += 1;
 
-    setTimeout(() => {
-      const selector = `#datepicker-${id}`;
-      initializeFlatpickr(selector, id);
-    }, 0);
+      setTimeout(() => {
+          const selector = `#datepicker-${id}`;
+          initializeFlatpickr(selector, id);
+      }, 0);
   };
 
-  $: formattedDates = [selectedDate, ...dateInputs.map(dateInput => dateInput.date)];
+  $: formattedDates = dateInputs.map(({ date, price }) => ({ date, price }));
+      
 
   $: {
-    isLastInputFilled = formattedDates.every(date => date !== '') && counter == formattedDates.length;
+      isLastInputFilled = formattedDates.every(({ date, price }) => date !== '' && price !== '') && counter == formattedDates.length;
   }
 
  
@@ -189,8 +213,9 @@
 
 const addPlace = async () => {
     try {
-      newPlace.dates = formattedDates.join(', ');
+      newPlace.dates = formattedDates.map(({ date, price }) => `${date} for ${price}€`).join(', ');
       console.log(newPlace.dates);
+      console.log(`Type of newPlace.dates: ${typeof newPlace.dates}`);
 
       const folderName = uuidv4();
       newPlace.folder = folderName;
@@ -239,20 +264,42 @@ const addPlace = async () => {
         newPlace.price.trim() !== "" &&
         newPlace.description.trim() !== "" &&
         newPlace.images.length >= 5 &&
-        formattedDates[0] != ""
+        dateInputs.every(input => input.date !== "" && input.price !== "")
     ) {
         valid = true;
     }
     else{
         valid = false;
     }
-
-    console.log(newPlace);
+    //console.log(dateInputs[0].date);
+    //console.log(formattedDates);
 };
 
  function changeAgree(){
     agree = !agree;
  }
+
+ const handleInput = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    let inputValue = target.value;
+    inputValue = inputValue.replace(/[^0-9]/g, '');
+
+
+    dateInputs[0].price = inputValue;
+    isFormValid();
+};
+
+const handleSecondInput = (event: Event, id: number) => {
+    const target = event.target as HTMLInputElement;
+    let inputValue = target.value;
+
+    inputValue = inputValue.replace(/[^0-9]/g, '');
+    dateInputs = dateInputs.map(input => (input.id === id ? { ...input, price: inputValue } : input));
+
+    isFormValid();
+};
+
+
 </script>
  
 
@@ -371,27 +418,41 @@ const addPlace = async () => {
 
           
           <h1 class="mt-10">Choose the days when people will be able to make a reservation:</h1>
-
-          <Input on:input={() => isFormValid()} type="text" id="datepicker" bind:value={selectedDate} placeholder="Click here to select a date" class="rounded-md mt-4 mb-2 w-15">
-            <CalendarMonthSolid slot="left"/>
-          </Input>
-
-          {#each dateInputs as { id, date } (id)}
-            <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
-              <CalendarMonthSolid slot="left"/>
-            </Input>
-          {/each}
-
-          <Button color="blue" on:click={addDateInput} class="mt-4" disabled={!isLastInputFilled}>Add more dates</Button>
-          <p class="mt-5">Selected Dates: {#each formattedDates as date, index (date)}
-            {#if index !== 0}, {/if}{date}
-          {/each}</p>
-
-
-
-
+          <div class="grid grid-cols-2 mt-6">
+              <div>
+                  <Input on:input={() => isFormValid()} type="text" id="datepicker" bind:value={selectedDate} placeholder="Click here to select a date" class="rounded-md w-15">
+                      <CalendarMonthSolid slot="left" />
+                  </Input>
+              </div>
+              <div>
+                <Input bind:value={dateInputs[0].price} placeholder="Price per night in €" class="w-48 h-10" on:input={handleInput}>
+                </Input>
+                
+              </div>
+              {#each dateInputs as { id, date, price } (id)}
+                {#if id !== 1}
+                <div>
+                    <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
+                        <CalendarMonthSolid slot="left" />
+                    </Input>
+                </div>
+                <div>
+                  <Input bind:value={price} placeholder="Price per night in €" class="w-48 h-10 mt-2" on:input={(event) => handleSecondInput(event, id)}>
+                  </Input>                                  
+                </div>
+                {/if}
+              {/each}
+          </div>
           
-          
+          <Button color="blue" on:click={() => {addDateInput(); isFormValid();}} class="mt-4" disabled={!isLastInputFilled}>Add more dates</Button>
+          <p class="mt-5">Selected Dates: 
+            {#if formattedDates.length > 0}
+                {#each formattedDates as { date, price }, index (date)}
+                    {#if index !== 0}, {/if}
+                    {date} {#if price}for {price}€{/if}
+                {/each}
+            {/if}
+          </p>
 
         <div class="items-center text-center">
             <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
