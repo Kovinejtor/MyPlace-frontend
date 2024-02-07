@@ -93,7 +93,6 @@ const getDisabledDates = (excludeId: number) => {
     animals: "",
     parking: "",
     minNight: 1,
-    price: "",
     description: "",
     folder: "",
     dates: "",
@@ -261,7 +260,6 @@ const addPlace = async () => {
         newPlace.adress.trim() !== "" &&
         newPlace.animals.trim() !== "" &&
         newPlace.parking.trim() !== "" &&
-        newPlace.price.trim() !== "" &&
         newPlace.description.trim() !== "" &&
         newPlace.images.length >= 5 &&
         dateInputs.every(input => input.date !== "" && input.price !== "")
@@ -379,10 +377,6 @@ const handleSecondInput = (event: Event, id: number) => {
                         <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">Minimum nights per reservationq</span>
                     </div>
                 </form>
-            </div>
-            <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.price} placeholder="Price per night" on:input={() => isFormValid()}>
-                </Input>
             </div>
         </div>
         <div class="p-4">
