@@ -10,6 +10,8 @@
   password: ""
   };
 
+  let emailForReset: string;
+
   let loginErrorMessage: string = '';
   let loginErrorMessageTwo: string = '';
   let show = false;
@@ -54,19 +56,38 @@
 };
 
 
-  const handleSubmit = async () => {
-    await checkLogin();
-    console.log(loginError);
-    // Only navigate if there is no login error
-    if (loginError) {
-      window.location.href = 'app'; // or use Svelte's router for navigation
-    }
-  };
+const handleSubmit = async () => {
+  await checkLogin();
+  console.log(loginError);
+
+  if (loginError) {
+    window.location.href = 'app'; 
+  }
+};
+
+
+const openDialogForPasswordReset = async () => {
+  const myDialog = document.getElementById('myDialog') as HTMLDialogElement;
+  myDialog.showModal();
+}
+
+const clearInputInDialog = async () => {
+  emailForReset = "";
+}
+
+const closeDialogForPasswordReset = async () => {
+  const myDialog = document.getElementById('myDialog') as HTMLDialogElement;
+  myDialog.close();    
+}
+
+const resetPassword = async () => {
+  console.log(emailForReset);
+}
 </script>
 
 
 <div class="h-screen bg-berkeley-blue w-full flex justify-center items-center">
-    <div class="mr-8">
+    <div class="mr-8 hidden md:block lg:block"> <!--needs at least a 766*y resolution so the image would be visible-->
       <img src="/main.jpg" class="object-cover h-96 w-100 rounded-lg" alt="product 1"/>
     </div>
     
@@ -106,6 +127,23 @@
         <p class="text-red-500 mt-2">{loginErrorMessageTwo}</p>
       {/if}
       <a href="register" class="mt-6 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Don't have an account. Register</a>
-      <p class="mt-3 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Forgot the password?</p>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+      <!-- svelte-ignore a11y-missing-attribute -->
+      <a role="button" tabindex="0" on:click={openDialogForPasswordReset} class="mt-3 font-medium text-blue-600 text-center dark:text-blue-500 hover:underline">Forgot the password?</a>
     </Card>
 </div>
+
+<dialog id="myDialog" class="rounded-lg">
+  <div class="grid grid-rows-2 gap-4 p-4">
+    <div>
+      <Input id="resset-password-input" size="lg" placeholder="Enter the e-mail" bind:value={emailForReset}/>
+    </div>
+    <div>
+      <Button on:click={resetPassword} color="blue">Resset password</Button>
+      <Button on:click={clearInputInDialog} color="purple">Clear input</Button>
+      <Button on:click={closeDialogForPasswordReset} color="red">Close</Button>    
+    </div>
+  </div>
+</dialog>

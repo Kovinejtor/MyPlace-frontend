@@ -4,14 +4,14 @@
     import { onMount } from 'svelte';
     import { app, storage } from '../../firebase';
   </script>
-  
+ 
   <div class="pt-10 pb-10" style="margin-top: 100px;">
     <div class="grid grid-cols-10 gap-3 mt-1 p-3 bg-berkeley-blue rounded">
       <div class="col-start-2 col-span-2">
         <Input id="email" type="email" placeholder="Search by city or country">
           <HomeSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
         </Input>
-      </div>
+        </div>
       
       <div class="col-start-5 col-span-2">
         <Input id="email" type="email" placeholder="Starting and final day of stay">

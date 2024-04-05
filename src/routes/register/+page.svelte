@@ -71,10 +71,8 @@
   const isRepeatPasswordValid = isValidRepeatPassword(registrationData.rePassword);
   const isPhoneValid = isValidPhone(registrationData.phoneNumber);
 
-  // Check if any field in registrationData is an empty string
   const isEmptyValue = Object.values(registrationData).some(value => value === "");
 
-  // Update isButtonDisabled based on conditions
   isButtonDisabled = isEmptyValue || !isEmailValid || !isPasswordValid || !isRepeatPasswordValid || !isPhoneValid;
 
   console.log(isButtonDisabled);
@@ -115,8 +113,9 @@
   </script>
   
   
-  <div class="bg-berkeley-blue w-full h-screen flex justify-center items-center">
-      <Card padding="xl" class="mr-12">
+  <div class="bg-berkeley-blue grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 p-6 gap-7 justify-center items-center md:h-screen lg:h-screen">
+    <div class="md:col-start-2 lg:col-start-2">
+      <Card padding="xl">
         <p class="mb-12 text-center font-bold text-black text-2xl">Register</p>
         <div class="mb-4">
           <Label class="block mb-2">Email address</Label>
@@ -194,6 +193,8 @@
         </div>
         
       </Card>
+    </div>
+    <div class="md:col-start-3 lg:col-start-3">
       <Card padding="xl">
         <div class="mb-4">
           <Label class="block mb-2">First name</Label>
@@ -226,4 +227,5 @@
         </div>
         <Button on:click={handleSubmit} disabled={isButtonDisabled} type="submit" color="blue">Create account</Button>
       </Card>
+    </div>
   </div> 
