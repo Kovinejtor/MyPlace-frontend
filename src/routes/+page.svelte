@@ -86,23 +86,23 @@ const resetPassword = async () => {
 </script>
 
 
-<div class="h-screen bg-berkeley-blue w-full flex justify-center items-center">
+<div class="h-screen bg-yale-blue w-full flex justify-center items-center">
     <div class="mr-8 hidden md:block lg:block"> <!--needs at least a 766*y resolution so the image would be visible-->
-      <img src="/main.jpg" class="object-cover h-96 w-100 rounded-lg" alt="product 1"/>
+      <img src="/main.jpg" class="object-cover h-96 w-100 rounded-lg border-4 border-sky-600" alt="product 1"/>
     </div>
     
-    <Card padding="xl">
-      <p class="mb-12 text-center font-bold text-black text-2xl">Log in</p>
+    <Card padding="xl" class="bg-berkeley-blue border-4 border-sky-600">
+      <p class="mb-12 text-center font-bold text-3xl text-white">Log in</p>
       <div class="mb-4">
-        <Label for="default-input" class="block mb-2">Email address</Label>
-        <Input id="default-input" bind:value={logInData.email} placeholder="Enter you email address">
+        <Label for="default-input" class="block mb-2 text-white">Email address</Label>
+        <Input id="default-input" bind:value={logInData.email} placeholder="Enter you email address" class="border-2 border-sky-600">
           <EnvelopeSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
         </Input>
       </div>
       <div class="mb-4">
-        <Label class="block mb-2">Password</Label>
+        <Label class="block mb-2 text-white">Password</Label>
         <div class="relative">
-          <Input id="password" type={show ? 'text' : 'password'} bind:value={logInData.password} placeholder="Enter your password">
+          <Input id="password" type={show ? 'text' : 'password'} bind:value={logInData.password} placeholder="Enter your password" class="border-2 border-sky-600">
             <LockSolid slot="left" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Input>
           

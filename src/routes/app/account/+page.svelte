@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount} from 'svelte';
-    import { Label, Input, Card, Button, Helper, Select} from 'flowbite-svelte';
+    import {Button, Checkbox} from 'flowbite-svelte';
 
     let userData = {
         userEmail: "",
@@ -10,6 +10,8 @@
         userCountry: "",
         userPhoneNumber: ""
     };
+
+    let checkboxValue:boolean;
 
     onMount(() => {
         check();
@@ -100,46 +102,79 @@
                 console.error('Access token not found in sessionStorage.');
             }
     }
+
+
+    const openDialogForAccountDelete = async () => {
+        const myDialog = document.getElementById('myDialog') as HTMLDialogElement;
+        myDialog.showModal();
+
+        const mainDiv = document.getElementById('mainDiv');
+        if (mainDiv) {
+            mainDiv.classList.add('blur-lg');
+        }
+        }
+
+    const closeDialogForAccountDelete = async () => {
+        const myDialog = document.getElementById('myDialog') as HTMLDialogElement;
+        myDialog.close(); 
+        
+        const mainDiv = document.getElementById('mainDiv');
+        if (mainDiv) {
+            mainDiv.classList.remove('blur-lg');
+        }
+    }
 </script>
 
-<div class="flex justify-center items-center" >
-    <Card class="bg-berkeley-blue grid grid-rows-3 ">
-        <div class="text-4xl font-bold text-center text-white">
+<div id="mainDiv" class="flex justify-center items-center">
+    <div class="bg-berkeley-blue grid grid-rows-5 md:grid-rows-4 lg:grid-rows-4 rounded-lg p-10 text-white mt-24 mb-8 shadow-2xl drop-shadow-lg border-2 border-sky-600">
+        <div class="row-span-1 md:row-span-1 lg:row-span-1 text-4xl font-bold text-center mt-7 h-32">
             <h1>
                 Info about your account
             </h1>
         </div>
-        <div class="grid grid-rows-3 grid-flow-col">
-            <div class="bg-oxford-blue rounded-lg">
+        <div class="row-span-3 md:row-span-2 lg:row-span-2 grid grid-rows-6 md:grid-rows-3 lg:grid-rows-3 grid-flow-col gap-5">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your email:</p> 
                 <p>{userData.userEmail}</p>
             </div>
-            <div class="bg-oxford-blue rounded-lg">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your first name:</p> 
                 <p>{userData.userFirstName}</p>
             </div>
-            <div class="bg-oxford-blue rounded-lg">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your last name:</p> 
                 <p>{userData.userLastName}</p>
             </div>
-            <div class="bg-oxford-blue rounded-lg">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your gender:</p> 
                 <p>{userData.userGender}</p>
             </div>
-            <div class="bg-oxford-blue rounded-lg">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your country:</p> 
                 <p>{userData.userCountry}</p>
 
             </div>
-            <div class="bg-oxford-blue rounded-lg">
+            <div class="bg-oxford-blue rounded-lg p-3 drop-shadow-lg border-2 border-sky-800">
                 <p class="font-bold">Your phone number:</p> 
                 <p>{userData.userPhoneNumber}</p>
             </div>
         </div>
-        <div>
-            <Button color="red" href="/" on:click={deleteAccount}>
+        <div class="row-span-1 md:row-span-1 lg:row-span-1 flex justify-center items-center h-auto">
+            <Button color="red" on:click={openDialogForAccountDelete} class="border-black">
                 Delete account
             </Button>
         </div>
-    </Card>
+    </div>
 </div>
+
+<dialog id="myDialog" class="rounded-lg bg-berkeley-blue border-2 border-sky-500">
+    <div class="grid grid-rows-2 gap-4 p-4">
+      <div>
+        <Checkbox class="text-white font-bold" bind:checked={checkboxValue}>I understand that deleting my account will permanently remove all of my data and cannot be undone</Checkbox>
+      </div>
+      <div>
+        <Button disabled={!checkboxValue} on:click={deleteAccount} href="/" color="red">Delete account</Button>
+        <Button on:click={closeDialogForAccountDelete} color="blue">Close</Button>    
+      </div>
+    </div>
+  </dialog>
