@@ -301,160 +301,143 @@ const handleSecondInput = (event: Event, id: number) => {
 </script>
  
 
-<div class=" flex justify-center items-center pt-10 pb-10 mt-14">
-    <div class="bg-berkeley-blue text-white w-1/2 rounded-lg p-5">
-        <p class="text-center mt-8 text-xl font-bold">If you want to add a place to the catalog you need to fill this form and accept the terms of service.</p>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 m-8 items-center text-center">
-            <div class="items-center text-center">
-                <Label>
-                    <Select items={countries} bind:value={newPlace.type} placeholder="Type of place" on:change={() => isFormValid()}/>
-                </Label>
-            </div>
-            <div class="items-center text-center ">
-                <Input id="email" type="email" bind:value={newPlace.name} placeholder="Name for the place" on:input={() => isFormValid()}>
-                </Input>
-            </div>
-            <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.country} placeholder="Country" on:input={() => isFormValid()}>
-                </Input>
-            </div>
-            <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.city} placeholder="City" on:input={() => isFormValid()}>
-                </Input>
-            </div>
-            <div class="items-center text-cente">
-                <Input id="email" type="email" bind:value={newPlace.adress} placeholder="Adress" on:input={() => isFormValid()}>
-                </Input>
-            </div>
-            <div>
-                <form class="max-w-sm mx-auto relative">
-                    <div class="relative">
-                        <span class="text-gray-500 dark:text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2">Maximum number of people:</span>
-                        <input type="number" id="number-input" bind:value={newPlace.maxPeople} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pl-56 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                    </div>
-                </form>
-            </div>
-            
-            
-            <div>
-                <form class="max-w-sm mx-auto relative">
-                    <div class="flex items-center">
-                        <input type="number" id="number-input" bind:value={newPlace.beds} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                        <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">beds</span>
-                    </div>
-                </form>
-            </div>
-            <div>
-                <form class="max-w-sm mx-auto relative">
-                    <div class="flex items-center">
-                        <input type="number" id="number-input" bind:value={newPlace.adults} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                        <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">adults</span>
-                    </div>
-                </form>
-            </div>
-            <div>
-                <form class="max-w-sm mx-auto relative">
-                    <div class="flex items-center">
-                        <input type="number" id="number-input" bind:value={newPlace.children} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="0" min="0" required>
-                        <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">children</span>
-                    </div>
-                </form>
-            </div>
-            <div class="items-center text-center">
-                <Label>
-                    <Select items={animals} bind:value={newPlace.animals} placeholder="Are animals allowed?" on:change={() => isFormValid()}/>
-                </Label>
-            </div>
-            <div class="items-center text-center">
-                <Label>
-                    <Select items={parking} bind:value={newPlace.parking} placeholder="Is there a parking?" on:change={() => isFormValid()}/>
-                </Label>
-            </div>
-            <div>
-                <form class="max-w-sm mx-auto relative">
-                    <div class="flex items-center">
-                        <input type="number" id="number-input" bind:value={newPlace.minNight} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="0" min="0" required>
-                        <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">Minimum nights per reservationq</span>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="p-4">
-            <span class="block text-lg font-semibold mb-4">
-              Upload Multiple Images
-            </span>
-            <div class="mb-4">
-              <button class="bg-blue-500 text-white px-4 py-2 rounded" on:click={openFileInput}>
-                Upload
-              </button>
-              <input type="file" id="image-upload" class="hidden" multiple bind:files on:change={handleFileUpload} on:change={() => isFormValid()}/>
-            </div>
-          
-            <div class="grid grid-cols-3 gap-4">
-              {#each imagePreviews as { id, src }, i (id)}
-              <div class="relative group">
-                <img src={src} alt={`Preview ${i}`} class="w-full h-32 object-cover rounded mb-2">
-                <div
-                  class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  role="button"
-                  tabindex={0}
-                >
-                  <button class="bg-white text-gray-800 p-2 rounded-full cursor-pointer" on:click={() => { removeImage(id); isFormValid(); }}>
-                    🗑️
-                  </button>
-                </div>
-              </div>
-              {/each}
-            </div>
-          </div>
+<div class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
+  <Card class="grid max-w-xl grid-rows-6 grid-flow-col bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-28">
+    <h1 class="text-2xl font-bold text-center mt-7">If you want to add a place to the catalog you need to fill this form and accept the terms of service.</h1>
+
+    <div class="row-span-5 grid grid-rows-12 md:grid-rows-6 lg:grid-rows-6 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-8 md:mt-20 lg:mt-20">
+      <div>
+        <Label class="text-white mb-1">Type of place</Label>
+        <Select items={countries} bind:value={newPlace.type} placeholder="Type of place" on:change={() => isFormValid()}/>  
+      </div>
+      <div>
+        <Label class="text-white mb-1">Name of the place</Label>
+        <Input bind:value={newPlace.name} placeholder="Name for the place" on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Name of the country</Label>
+        <Input bind:value={newPlace.country} placeholder="Country" on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Name of the city</Label>
+        <Input bind:value={newPlace.city} placeholder="City" on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Insert the address</Label>
+        <Input bind:value={newPlace.adress} placeholder="Adress" on:input={() => isFormValid()} />
+      </div>
+
+      <div>
+        <Label class="text-white mb-1">Maximum number of people</Label>
+        <Input type="number" min="1" bind:value={newPlace.maxPeople} on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Number of beds</Label>
+        <Input type="number" min="1" bind:value={newPlace.beds} on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Number of adults</Label>
+        <Input type="number" min="1" bind:value={newPlace.adults} on:input={() => isFormValid()} />
+      </div>
+      <div>
+        <Label class="text-white mb-1">Number of children</Label>
+        <Input type="number" min="0" bind:value={newPlace.children} on:input={() => isFormValid()} />
+      </div>
+
+      <div>
+        <Label class="text-white mb-1">Are animals allowed?</Label>
+        <Select items={animals} bind:value={newPlace.animals} placeholder="Are animals allowed?" on:change={() => isFormValid()}/>
+      </div>
+      <div>
+        <Label class="text-white mb-1">Is there a parking?</Label>
+        <Select items={parking} bind:value={newPlace.parking} placeholder="Is there a parking?" on:change={() => isFormValid()}/>
+      </div>
+      <div>
+        <Label class="text-white mb-1">Minimum nights per reservation</Label>
+        <Input type="number" min="1" bind:value={newPlace.minNight} on:input={() => isFormValid()} />
+      </div>
+
+      <div class="md:col-span-2 lg:col-span-2">
         <Textarea {...textareaprops} bind:value={newPlace.description} on:input={() => isFormValid()}/>
-
-
-          
-          <h1 class="mt-10">Choose the days when people will be able to make a reservation:</h1>
-          <div class="grid grid-cols-2 mt-6">
-              <div>
-                  <Input on:input={() => isFormValid()} type="text" id="datepicker" bind:value={selectedDate} placeholder="Click here to select a date" class="rounded-md w-15">
-                      <CalendarMonthSolid slot="left" />
-                  </Input>
-              </div>
-              <div>
-                <Input bind:value={dateInputs[0].price} placeholder="Price per night in €" class="w-48 h-10" on:input={handleInput}>
-                </Input>
-                
-              </div>
-              {#each dateInputs as { id, date, price } (id)}
-                {#if id !== 1}
-                <div>
-                    <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
-                        <CalendarMonthSolid slot="left" />
-                    </Input>
-                </div>
-                <div>
-                  <Input bind:value={price} placeholder="Price per night in €" class="w-48 h-10 mt-2" on:input={(event) => handleSecondInput(event, id)}>
-                  </Input>                                  
-                </div>
-                {/if}
-              {/each}
-          </div>
-          
-          <Button color="blue" on:click={() => {addDateInput(); isFormValid();}} class="mt-4" disabled={!isLastInputFilled}>Add more dates</Button>
-          <p class="mt-5">Selected Dates: 
-            {#if formattedDates.length > 0}
-                {#each formattedDates as { date, price }, index (date)}
-                    {#if index !== 0}, {/if}
-                    {date} {#if price}for {price}€{/if}
-                {/each}
-            {/if}
-          </p>
-
-        <div class="items-center text-center">
-            <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
-            {#if valid && agree}
-               <Button href="/app" on:click={handleSubmit} color="blue" class="mt-8 w-56" disabled={!valid}>Add place</Button>
-            {:else}
-                <Button color="blue" class="mt-8 w-56" disabled={!valid || !agree}>Add place</Button>
-            {/if}
-        </div>
+      </div>
     </div>
+  </Card>
+  
+  
+  <Card class="max-w-xl bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+      <h1 class="text-xl font-bold">Upload multiple images. At least n.</h1>
+
+      <div class="mt-6 mb-6">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded" on:click={openFileInput}>
+          Upload
+        </button>
+        <input type="file" id="image-upload" class="hidden" multiple bind:files on:change={handleFileUpload} on:change={() => isFormValid()}/>
+      </div>
+    
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-4">
+        {#each imagePreviews as { id, src }, i (id)}
+        <div class="relative group">
+          <img src={src} alt={`Preview ${i}`} class="w-full h-32 object-cover rounded mb-2">
+          <div
+            class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            role="button"
+            tabindex={0}
+          >
+            <button class="bg-white text-gray-800 p-2 rounded-full cursor-pointer" on:click={() => { removeImage(id); isFormValid(); }}>
+              🗑️
+            </button>
+          </div>
+        </div>
+        {/each}
+      </div>
+  </Card>
+
+  <Card class="max-w-xl bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-20">
+    <h1 class="text-xl font-bold p-4">Choose the days when people will be able to make a reservation for your place: </h1>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-2 mt-16">
+        <div>
+          <Input on:input={() => isFormValid()} type="text" id="datepicker" bind:value={selectedDate} placeholder="Click here to select a date" class="rounded-md w-15">
+              <CalendarMonthSolid slot="left" />
+          </Input>
+        </div>
+        <div class="mt-1 md:mt-0 lg:mt-0">
+          <Input bind:value={dateInputs[0].price} placeholder="Price per night in €" class="w-48 h-10" on:input={handleInput}>
+          </Input>
+        </div>
+        {#each dateInputs as { id, date, price } (id)}
+          {#if id !== 1}
+            <div class="mt-3 md:mt-0 lg:mt-0">
+                <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
+                    <CalendarMonthSolid slot="left" />
+                </Input>
+            </div>
+            <div class="mt-1 md:mt-0 lg:mt-0">
+              <Input bind:value={price} placeholder="Price per night in €" class="w-48 h-10" on:input={(event) => handleSecondInput(event, id)}>
+              </Input>                                  
+            </div>
+          {/if}
+        {/each}
+    </div>
+
+    <Button color="blue" on:click={() => {addDateInput(); isFormValid();}} class="mt-4" disabled={!isLastInputFilled}>Add more dates</Button>
+    <p class="mt-5">Selected Dates: 
+      {#if formattedDates.length > 0}
+          {#each formattedDates as { date, price }, index (date)}
+              {#if index !== 0}, {/if}
+              {date} {#if price}for {price}€{/if}
+          {/each}
+      {/if}
+    </p>
+
+    <div class="items-center text-center">
+      <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
+        {#if valid && agree}
+          <Button href="/app" on:click={handleSubmit} color="blue" class="mt-8 w-56" disabled={!valid}>Add place</Button>
+        {:else}
+            <Button color="blue" class="mt-8 w-56" disabled={!valid || !agree}>Add place</Button>
+        {/if}
+    </div>
+  </Card>
 </div>
+
