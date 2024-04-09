@@ -67,6 +67,7 @@
     parking: string;
     price: string;
     image?: string;
+    images: string[];
     tags: string[]; 
     dateRange: string;
 }
@@ -151,7 +152,7 @@
                 ...place,
                 tags: [place.type, place.country, place.city]
             }));
-                //console.log('All places for current user:', places);
+                console.log('All places for current user:', places);
                 retrieveFirstImages();
             } else {
                 console.error('Failed to fetch places for current user:', response.statusText);
@@ -205,18 +206,73 @@ const dispatch = createEventDispatcher();
 
   let selectedPlace: Place | null = null;
 
-function openDialog(place: Place) {
+
+const getImagesForOpenedDialog = async () => {
+    if (!selectedPlace || !selectedPlace.folder) {
+        console.error("Selected place or folder is not available.");
+        return;
+    }
+
+    const folderName = selectedPlace.folder;
+    const folderPath = `images/${folderName}`;
+    const folderRef = ref(storage, folderPath); 
+
+    try {
+        const imageRefs = await listAll(folderRef); 
+        const imageURLs: string[] = [];
+
+        for (const imageRef of imageRefs.items) {
+            const imageURL = await getDownloadURL(imageRef); 
+            imageURLs.push(imageURL);
+        }
+
+        selectedPlace.images = imageURLs;
+        console.log("Retrieved images:", imageURLs);
+    } catch (error) {
+        console.error("Error retrieving images:", error);
+    }
+};
+
+async function openDialog(place: Place) {
+    const mainDiv = document.getElementById('mainDiv');
+    if (mainDiv) {
+        mainDiv.classList.add('blur-lg');
+    }
+
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) {
+        mainCard.classList.add('h-screen');
+    }
+
     parseDatesAndPrices(place);
     isOpen = true;
     
     selectedPlace = place;
-    
+    await getImagesForOpenedDialog();
+    renderDialog();
+
     setTimeout(() => {
     for (let i = 0; i < datePricePairs.length; i++) {
         initializeFlatpickr('#datepicker-' + i, i);
     }
 }, 0);
    
+}
+
+function renderDialog() {
+    // Render dialog content here, including the images
+    const imagesContainer = document.getElementById('images-container');
+    if (imagesContainer && selectedPlace?.images) {
+        imagesContainer.innerHTML = ''; // Clear previous content
+
+        selectedPlace.images.forEach(imageURL => {
+            const img = document.createElement('img');
+            img.src = imageURL;
+            img.alt = 'Image';
+            img.classList.add('w-full', 'h-48');
+            imagesContainer.appendChild(img);
+        });
+    }
 }
 
 const flatpickrInstances: flatpickr.Instance[] = [];
@@ -247,7 +303,7 @@ function updateDisabledRanges(){
 
 function addDisabled(id: number){
     console.log("ALL", datePricePairs);
-    console.log(datePricePairs[1].dateRange);
+    console.log(datePricePairs[1]?.dateRange);  //undefined -> TODO: check undefined
     const disabledRanges = datePricePairs
         .filter((pair, index) => index !== id) 
         .map(pair => {
@@ -266,6 +322,16 @@ function addDisabled(id: number){
 
 
   function closeDialog() {
+    const mainDiv = document.getElementById('mainDiv');
+    if (mainDiv) {
+        mainDiv.classList.remove('blur-lg');
+    }
+
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) {
+        mainCard.classList.remove('h-screen');
+    }
+
     isOpen = false;
     console.log(datePricePairs);
     datePricePairs = [];
@@ -349,27 +415,27 @@ function parseDatesAndPrices(place: Place) {
     
 }
 
+
 </script>
 
 
-<div class="grid grid-cols-3 flex justify-center items-center p-14 mt-14">
-    <div class="flex col-span-3  justify-center items-center">
-        <Card class="bg-berkeley-blue text-white">
-            {#if count === 0}
-                <p>You currently don't have any of your own places in the catalog that other people can rent.</p>
-            {:else if count === 1}
-                <p>You have {count} place in the catalog that others can rent.</p>
-            {:else}
-                <p>You have {count} places in the catalog that others can rent.</p>
-            {/if}
-            <div class="items-center text-center">
-                <Button href="/app/myPlaces/addingPlace" color="blue" class="mt-6 w-56">Add place</Button>
-            </div>
-            
-        </Card>
-    </div>
-    {#if count!=0}
-      <div class="flex col-span-3 grid grid-cols-4 gap-16 justify-center items-center mt-20 bg-berkeley-blue text-white rounded p-14">
+<div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
+    <Card id="mainCard"class="bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-28 text-center">
+        {#if count === 0}
+            <p>You currently don't have any of your own places in the catalog that other people can rent.</p>
+        {:else if count === 1}
+            <p>You have {count} place in the catalog that others can rent.</p>
+        {:else}
+            <p>You have {count} places in the catalog that others can rent.</p>
+        {/if}
+        <div class="items-center text-center">
+            <Button href="/app/myPlaces/addingPlace" color="blue" class="mt-6 w-56">Add place</Button>
+        </div>
+    </Card>
+    
+    <div>
+     {#if count!=0}
+      <Card class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-2xl bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-16">
         {#if $imagesLoaded}
           {#each places as place (place.id)}
             <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
@@ -387,69 +453,57 @@ function parseDatesAndPrices(place: Place) {
             </div>
           {/each}
         {/if}
-      </div>
-    {/if}
-    
+      </Card>
+     {/if}
+    </div>
+</div>
 
-    {#if isOpen}
-  {#if selectedPlace}
-    <div class="fixed z-10 inset-0 overflow-y-auto mt-14">
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity">
-          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-berkeley-blue px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="leading-6 font-bold text-4xl text-white">{selectedPlace.name}</h3>
-                <div class="mt-10 ml-14 grid grid-cols-2 gap-8 justify-center flexs items-center text-white">
-                  <p class="text-sm">
-                    Type: {selectedPlace.type}
-                  </p>
-                  <p class="text-sm">
-                    Country: {selectedPlace.country}
-                  </p>
-                  <p class="text-sm">
-                    City: {selectedPlace.city}
-                  </p>
-                  <p class="text-sm">
-                    Address: {selectedPlace.adress}
-                  </p>
-                  <div class="flex items-center">
-                        <input type="number" id="number-input" bind:value={selectedPlace.beds} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                        <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">beds</span>
+
+{#if isOpen}
+    {#if selectedPlace}
+        <div class="absolute inset-0 flex justify-center items-center">
+            <Card class="mt-[700px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+                <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
+
+                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Location: {selectedPlace.country}, {selectedPlace.city}, {selectedPlace.adress}</p>
+
+                <div>
+                    <Label class="text-white mb-1">Maximum number of people</Label>
+                    <Input type="number" min="1" bind:value={selectedPlace.maxPeople}/>
+                </div>
+
+                <div>
+                    <Label class="text-white mb-1">Number of beds</Label>
+                    <Input type="number" min="1" bind:value={selectedPlace.beds}/>
+                </div>
+                <div>
+                    <Label class="text-white mb-1">Number of adults</Label>
+                    <Input type="number" min="1" bind:value={selectedPlace.adults}/>
+                </div>
+                <div>
+                    <Label class="text-white mb-1">Number of children</Label>
+                    <Input type="number" min="0" bind:value={selectedPlace.children}/>
+                </div>
+
+                <div>
+                    <Label class="text-white mb-1">Are animals allowed?</Label>
+                    <Select items={animals} bind:value={selectedPlace.animals} placeholder="Are animals allowed?"/>
                   </div>
-                  <div class="flex items-center">
-                    <input type="number" id="number-input" bind:value={selectedPlace.maxPeople} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                    <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">max people</span>
+                  <div>
+                    <Label class="text-white mb-1">Is there a parking?</Label>
+                    <Select items={parking} bind:value={selectedPlace.parking} placeholder="Is there a parking?"/>
                   </div>
-                  <div class="flex items-center">
-                      <input type="number" id="number-input" bind:value={selectedPlace.adults} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                      <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">adults</span>
+                  <div>
+                    <Label class="text-white mb-1">Minimum nights per reservation</Label>
+                    <Input type="number" min="1" bind:value={selectedPlace.minNight}/>
                   </div>
-                  <div class="flex items-center">
-                    <input type="number" id="number-input" bind:value={selectedPlace.children} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                    <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">children</span>
-                  </div>
-                  <div class="flex items-center">
-                    <input type="number" id="number-input" bind:value={selectedPlace.minNight} aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="1" min="1" required>
-                    <span class="ml-2 text-gray-500 dark:text-gray-400 absolute ml-8">min nights</span>
-                  </div>
-                  <div class="items-center text-center">
-                    <Label>
-                        <Select items={animals} bind:value={selectedPlace.animals} placeholder="Are animals allowed?"/>
-                    </Label>
-                  </div>
-                  <div class="items-center text-center">
-                    <Label>
-                        <Select items={parking} bind:value={selectedPlace.parking} placeholder="Is there a parking?"/>
-                    </Label>
-                  </div>
-                  <div class="col-span-2">
+            
+                  <div class="md:col-span-2 lg:col-span-2">
                     <Textarea {...textareaprops} bind:value={selectedPlace.description}/>
                   </div>
+
+
+                  <div id="images-container" class="col-span-2 grid grid-cols-2 gap-4"></div>
 
                   {#each datePricePairs as { dateRange, price }, index}
                       <div>
@@ -457,30 +511,24 @@ function parseDatesAndPrices(place: Place) {
                           </Input>
                       </div>
                       <div>
-                          <Input bind:value={price} placeholder="Price per night in €" class="w-48 h-10">
+                          <Input bind:value={price} placeholder="Price per night in €" class="w-28 h-10">
                           </Input>
                       </div>
                   {/each}
-                <div>
-                  
-              </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="bg-berkeley-blue px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" on:click={closeDialog}>
-              Close
-            </button>
-            <button type="button" on:click={() => changeData()} class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-              Modify
-            </button>
-          </div>
+                  
+
+
+                  <Button on:click={() => changeData()}>
+                    Modify
+                  </Button>
+
+                  <Button color="blue" on:click={closeDialog}>
+                    Close
+                  </Button>
+            </Card>
         </div>
-      </div>
-    </div>
-  {/if}
+    {/if}
 {/if}
-</div>
+
 
