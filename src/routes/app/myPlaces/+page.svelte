@@ -2,7 +2,7 @@
     import {Card, Button, Label, Select, Textarea, Input} from 'flowbite-svelte';
     import { onMount, afterUpdate, createEventDispatcher  } from 'svelte';
     import { app, storage } from '../../../firebase';
-    import { getStorage, ref, uploadBytes, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
+    import { getStorage, ref, uploadBytes, getDownloadURL, listAll, getMetadata, deleteObject} from 'firebase/storage';
     import { writable } from 'svelte/store';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
@@ -163,7 +163,7 @@
     }
 
 
-    async function getFirstImage(folderName: string): Promise<string | null> {
+async function getFirstImage(folderName: string): Promise<string | null> {
     try {
         const folderRef = ref(storage, `images/${folderName}`);
         const items = await listAll(folderRef);
@@ -259,18 +259,63 @@ async function openDialog(place: Place) {
    
 }
 
+async function deleteImage(imageURL: string) {
+    try {
+        if (!selectedPlace) {
+            console.error("Selected place is null.");
+            return;
+        }
+
+        if (selectedPlace.images && selectedPlace.images.length <= 5) {
+            console.error("Cannot delete image. Minimum of 5 images required.");
+            return;
+        }
+
+        const imageRef = ref(storage, imageURL);
+
+        await deleteObject(imageRef);
+
+        console.log("Image deleted successfully:", imageURL);
+
+        selectedPlace.images = selectedPlace.images?.filter(url => url !== imageURL) || [];
+
+        renderDialog();
+    } catch (error) {
+        console.error("Error deleting image:", error);
+    }
+}
+
+
 function renderDialog() {
-    // Render dialog content here, including the images
     const imagesContainer = document.getElementById('images-container');
     if (imagesContainer && selectedPlace?.images) {
-        imagesContainer.innerHTML = ''; // Clear previous content
+        imagesContainer.innerHTML = ''; 
 
         selectedPlace.images.forEach(imageURL => {
+            const imageWrapper = document.createElement('div'); 
+            imageWrapper.classList.add('relative'); 
+
             const img = document.createElement('img');
             img.src = imageURL;
             img.alt = 'Image';
             img.classList.add('w-full', 'h-48');
-            imagesContainer.appendChild(img);
+            imageWrapper.appendChild(img);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.classList.add('absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2', 'bg-white', 'text-gray-800', 'p-2', 'rounded-full', 'cursor-pointer', 'opacity-0', 'transition-opacity', 'duration-300');
+            deleteButton.innerHTML = '🗑️';
+            deleteButton.addEventListener('click', () => deleteImage(imageURL)); 
+            imageWrapper.appendChild(deleteButton);
+
+            imageWrapper.addEventListener('mouseenter', () => {
+                deleteButton.classList.remove('opacity-0');
+            });
+
+            imageWrapper.addEventListener('mouseleave', () => {
+                deleteButton.classList.add('opacity-0');
+            });
+
+            imagesContainer.appendChild(imageWrapper);
         });
     }
 }
@@ -415,7 +460,43 @@ function parseDatesAndPrices(place: Place) {
     
 }
 
+function openFileInput() {
+    const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+    fileInput?.click();
+}
 
+async function handleImageUpload(event: { currentTarget: HTMLInputElement }) {
+    const fileInput = event.currentTarget;
+    
+    if (!fileInput) {
+        return;
+    }
+
+    const files = fileInput.files;
+
+    if (!files || files.length === 0) {
+        return;
+    }
+
+    const uploadPromises = [];
+
+    for (const file of files) {
+        const storageRef = ref(storage, `images/${selectedPlace?.folder}/${file.name}`);
+        const uploadTask = uploadBytes(storageRef, file);
+        uploadPromises.push(uploadTask);
+    }
+
+    try {
+        await Promise.all(uploadPromises);
+        console.log("Images uploaded successfully.");
+
+        // Refresh the list of images
+        await getImagesForOpenedDialog();
+        renderDialog();
+    } catch (error) {
+        console.error("Error uploading images:", error);
+    }
+}
 </script>
 
 
@@ -504,6 +585,13 @@ function parseDatesAndPrices(place: Place) {
 
 
                   <div id="images-container" class="col-span-2 grid grid-cols-2 gap-4"></div>
+                  <div class="col-span-2 w-80 flex justify-center items-center">
+                    <Button color="blue" on:click={openFileInput}>Add image</Button>
+                    <input type="file" id="image-upload" class="hidden" multiple on:change={handleImageUpload}/>
+                  </div>
+
+
+                  
 
                   {#each datePricePairs as { dateRange, price }, index}
                       <div>
@@ -515,9 +603,6 @@ function parseDatesAndPrices(place: Place) {
                           </Input>
                       </div>
                   {/each}
-
-                  
-
 
                   <Button on:click={() => changeData()}>
                     Modify
