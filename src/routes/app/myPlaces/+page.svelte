@@ -543,7 +543,7 @@ async function handleImageUpload(event: { currentTarget: HTMLInputElement }) {
 {#if isOpen}
     {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[700px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
                 <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
                 <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Location: {selectedPlace.country}, {selectedPlace.city}, {selectedPlace.adress}</p>
@@ -584,8 +584,8 @@ async function handleImageUpload(event: { currentTarget: HTMLInputElement }) {
                   </div>
 
 
-                  <div id="images-container" class="col-span-2 grid grid-cols-2 gap-4"></div>
-                  <div class="col-span-2 w-80 flex justify-center items-center">
+                  <div id="images-container" class="md:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2"></div>
+                  <div class="md:col-span-2 lg:col-span-2 w-80 flex justify-center items-center">
                     <Button color="blue" on:click={openFileInput}>Add image</Button>
                     <input type="file" id="image-upload" class="hidden" multiple on:change={handleImageUpload}/>
                   </div>
