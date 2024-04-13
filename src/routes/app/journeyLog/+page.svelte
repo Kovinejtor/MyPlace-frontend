@@ -1,26 +1,27 @@
 <script lang="ts">
-    import { onMount} from 'svelte';
+    import { onMount } from 'svelte';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
-	import type { Instance } from 'flatpickr/dist/types/instance';
+    import type { Instance } from 'flatpickr/dist/types/instance';
 
-
+    // @ts-ignore
+    let fp;
 
     onMount(() => {
-        const fp = flatpickr(`#mainDiv`, {
-            onDayCreate: function(dObj, dStr, fp, dayElem){
-                
+        fp = flatpickr(`#mainDiv`, {
+            mode: "range",
+            onDayCreate: function(dObj, dStr, fpInstance, dayElem){
                 if(dayElem.ariaLabel == "May 10, 2024"){
                     dayElem.innerHTML += "<span class='absolute top-4 left-4 text-[10px]'>123&</span>";
                 }
-                console.log(dayElem);
             }
         });
-        
     });
 
     function doSomething(){
-        //console.log(fp.currentYear());
+            // @ts-ignore
+        const selectedDates = fp.selectedDates.map(date => date.toLocaleDateString('en-GB'));
+        console.log(selectedDates);
     }
 </script>
 
@@ -28,5 +29,3 @@
     <input id="mainDiv" placeholder="Enter date">
     <button on:click={doSomething}>HEJ</button>
 </div>
-
-

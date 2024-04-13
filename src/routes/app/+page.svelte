@@ -41,7 +41,11 @@ let showImage:boolean = false;
 
 const imagesLoaded = writable(false);
 let isOpen = false;
+// @ts-ignore
+let fp;
 
+let dateRangesPrice: { from: string; to: string; price: string }[]
+let totalPrice = 0;
 
   onMount(() => {
 
@@ -154,7 +158,6 @@ async function openDialog(place: Place) {
         mainCard.classList.add('h-screen');
     }
 
-    
     isOpen = true;
     
     selectedPlace = place;
@@ -167,7 +170,7 @@ async function openDialog(place: Place) {
         return { from, to };
     });
 
-    const dateRangesPrice = selectedPlace.dates.split(',').map(dateRange => {
+    dateRangesPrice = selectedPlace.dates.split(',').map(dateRange => {
       const [datesPart, pricePart] = dateRange.split(' for ');
       const [from, to] = datesPart.split(' to ');
       const price = pricePart.split(' ')[0]; 
@@ -175,7 +178,6 @@ async function openDialog(place: Place) {
       });
     //console.log(dateRangesPrice);
 
-    
     const dateRangesFormatted = dateRangesPrice.map(range => {
         const [fromDay, fromMonth, fromYear] = range.from.split('-').map(Number);
         const [toDay, toMonth, toYear] = range.to.split('-').map(Number);
@@ -192,7 +194,7 @@ async function openDialog(place: Place) {
 
     console.log(dateRangesFormatted);
 
-    flatpickr(`#dateInput`, {
+    fp = flatpickr(`#dateInput`, {
       dateFormat: "d-m-Y", 
       minDate: "today",
       mode: "range",
@@ -210,15 +212,6 @@ async function openDialog(place: Place) {
     }
       });
 
-
-    //renderDialog();
-    /*
-    setTimeout(() => {
-    for (let i = 0; i < datePricePairs.length; i++) {
-        initializeFlatpickr('#datepicker-' + i, i);
-    }
-}, 0);
-   */
 }
 
 function closeDialog() {
@@ -255,6 +248,83 @@ function filterPlacesByCategory(category: string): (event: MouseEvent<HTMLDivEle
         console.log(filteredPlaces);
     };
 }
+
+
+function calculateTotalPrice() {
+     totalPrice = 0;
+    // @ts-ignore
+    const selectedDates: string[] = fp.selectedDates.map((date: Date) => {
+        const formattedDate = date.toLocaleDateString('en-GB');
+        const [day, month, year] = formattedDate.split('/');
+        return `${day}-${month}-${year}`;
+    });
+    
+    const dates: Date[] = selectedDates.map(dateStr => {
+        const [day, month, year] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day); 
+    });
+
+    // Find the range between the dates
+    const filledDates: Date[] = [];
+    for (let i = 0; i < dates.length - 1; i++) {
+        const currentDate = new Date(dates[i]);
+        const nextDate = new Date(dates[i + 1]);
+        while (currentDate < nextDate) {
+            filledDates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+    
+    // Convert Date objects back to strings
+    const filledDateStrings: string[] = filledDates.map(date => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    });
+
+    const correctedDateRangesPrice = dateRangesPrice.map(obj => {
+        return {
+            from: obj.from.trim(), // Trim extra space
+            to: obj.to,
+            price: parseInt(obj.price)
+        };
+    });
+    
+    //console.log("SD: ", filledDateStrings);
+    //console.log("CDRP: ", correctedDateRangesPrice);
+
+    for (const selectedDate of filledDateStrings) {
+        // Convert selectedDate string to Date object for comparison
+        const [day, month, year] = selectedDate.split('-');
+        const date = new Date(`${year}-${month}-${day}`);
+
+        //console.log('Checking date:', date);
+
+        // Find the corresponding date ranges
+        const correspondingDateRanges = correctedDateRangesPrice.filter(dateRange => {
+            const [rangeDay, rangeMonth, rangeYear] = dateRange.from.split('-');
+            const fromDate = new Date(`${rangeYear}-${rangeMonth}-${rangeDay}`);
+            const [toDay, toMonth, toYear] = dateRange.to.split('-');
+            const toDate = new Date(`${toYear}-${toMonth}-${toDay}`);
+            return date >= fromDate && date <= toDate;
+        });
+
+        //console.log('Corresponding date ranges:', correspondingDateRanges);
+
+        // If any corresponding date range is found, add their prices to the total
+        if (correspondingDateRanges.length > 0) {
+            for (const dateRange of correspondingDateRanges) {
+                totalPrice += dateRange.price;
+            }
+        }
+    }
+
+    console.log("Total Price:", totalPrice + "€");
+}
+
+
+
 </script>
  
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
@@ -369,7 +439,8 @@ function filterPlacesByCategory(category: string): (event: MouseEvent<HTMLDivEle
                 </div>
               {/if}
 
-              <Input id="dateInput" placeholder="Select Date"/>
+              <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
+              <p>Total price: {totalPrice}€</p>
               <Button>
                 Reserve
               </Button>
