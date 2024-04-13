@@ -1,10 +1,12 @@
 <script lang="ts">
-    import {Input, Card, Button, Label, Select, Textarea} from 'flowbite-svelte';
+    import {Card, Button, Input} from 'flowbite-svelte';
     import {HomeSolid, CalendarMonthSolid, UsersSolid } from 'flowbite-svelte-icons';
     import { onMount} from 'svelte';
     import { writable } from 'svelte/store';
-    import { app, storage } from '../../firebase';
-    import { getStorage, ref, uploadBytes, getDownloadURL, listAll, getMetadata, deleteObject} from 'firebase/storage';
+    import { storage } from '../../firebase';
+    import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
+    import flatpickr from 'flatpickr';
+    import 'flatpickr/dist/flatpickr.css';
 
   interface Place {
     id: number;
@@ -39,6 +41,7 @@ let showImage:boolean = false;
 
 const imagesLoaded = writable(false);
 let isOpen = false;
+
 
   onMount(() => {
 
@@ -134,7 +137,7 @@ const getImagesForOpenedDialog = async () => {
 
         showImage = true;
         selectedPlace.images = imageURLs;
-        console.log("Retrieved images:", imageURLs);
+        //console.log("Retrieved images:", imageURLs);
     } catch (error) {
         console.error("Error retrieving images:", error);
     }
@@ -151,12 +154,63 @@ async function openDialog(place: Place) {
         mainCard.classList.add('h-screen');
     }
 
-    //parseDatesAndPrices(place);
+    
     isOpen = true;
     
     selectedPlace = place;
-    console.log("Selected: ", selectedPlace);
+    console.log("Selected dates: ", selectedPlace.dates);
     await getImagesForOpenedDialog();
+    
+    const dateRanges = selectedPlace.dates.split(',').map(dateRange => {
+        const [datesPart, pricePart] = dateRange.split(' for ');
+        const [from, to] = datesPart.split(' to ');
+        return { from, to };
+    });
+
+    const dateRangesPrice = selectedPlace.dates.split(',').map(dateRange => {
+      const [datesPart, pricePart] = dateRange.split(' for ');
+      const [from, to] = datesPart.split(' to ');
+      const price = pricePart.split(' ')[0]; 
+      return { from, to, price: `${price}` };
+      });
+    //console.log(dateRangesPrice);
+
+    
+    const dateRangesFormatted = dateRangesPrice.map(range => {
+        const [fromDay, fromMonth, fromYear] = range.from.split('-').map(Number);
+        const [toDay, toMonth, toYear] = range.to.split('-').map(Number);
+
+        const fromDate = new Date(fromYear, fromMonth - 1, fromDay);
+        const toDate = new Date(toYear, toMonth - 1, toDay);
+
+        // Format the dates as "May 10, 2024"
+        const fromFormatted = fromDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const toFormatted = toDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+        return { from: fromFormatted, to: toFormatted, price: range.price };
+    });
+
+    console.log(dateRangesFormatted);
+
+    flatpickr(`#dateInput`, {
+      dateFormat: "d-m-Y", 
+      minDate: "today",
+      mode: "range",
+      enable: dateRanges,
+      onDayCreate: function(dObj, dStr, fp, dayElem) {
+        dateRangesFormatted.forEach(range => {
+            const startDate = new Date(range.from);
+            const endDate = new Date(range.to);
+            const currentDate = new Date(dayElem.ariaLabel);
+
+            if (currentDate >= startDate && currentDate <= endDate) {
+                dayElem.innerHTML += `<span class='absolute top-4 left-4 text-[10px]'>${range.price}</span>`;
+            }
+        });
+    }
+      });
+
+
     //renderDialog();
     /*
     setTimeout(() => {
@@ -314,6 +368,8 @@ function filterPlacesByCategory(category: string): (event: MouseEvent<HTMLDivEle
                   </button>
                 </div>
               {/if}
+
+              <Input id="dateInput" placeholder="Select Date"/>
               <Button>
                 Reserve
               </Button>
