@@ -497,6 +497,30 @@ async function handleImageUpload(event: { currentTarget: HTMLInputElement }) {
         console.error("Error uploading images:", error);
     }
 }
+
+async function deletePlace(placeId: number, folderName: string): Promise<void> {
+  try {
+    
+    const storageRef = ref(storage, `images/${folderName}`);
+    const filesList = await listAll(storageRef);
+    await Promise.all(filesList.items.map(item => deleteObject(item)));
+
+    const url = `http://127.0.0.1:8000/deletePlace/${placeId}`;
+    const response = await fetch(url, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(`Failed to delete place: ${errorMessage}`);
+    }
+
+    console.log('Place deleted successfully');
+  } catch (error) {
+    console.error('Error deleting place:', error);
+  }
+}
+
 </script>
 
 
@@ -607,10 +631,12 @@ async function handleImageUpload(event: { currentTarget: HTMLInputElement }) {
                   <Button on:click={() => changeData()}>
                     Modify
                   </Button>
-
+                  
+                  <Button color="dark" on:click={() => selectedPlace && deletePlace(selectedPlace.id, selectedPlace.folder)}>Delete place</Button>
                   <Button color="blue" on:click={closeDialog}>
                     Close
                   </Button>
+
             </Card>
         </div>
     {/if}

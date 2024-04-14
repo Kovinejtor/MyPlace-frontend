@@ -1,12 +1,13 @@
 <script lang="ts">
-    import {Card, Button, Input} from 'flowbite-svelte';
-    import {HomeSolid, CalendarMonthSolid, UsersSolid } from 'flowbite-svelte-icons';
+    import {Card, Button, Input, Search} from 'flowbite-svelte';
+    import {HomeSolid, CalendarMonthSolid, UsersSolid, SearchOutline } from 'flowbite-svelte-icons';
     import { onMount} from 'svelte';
     import { writable } from 'svelte/store';
     import { storage } from '../../firebase';
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
+	import { stringify } from 'postcss';
 
   interface Place {
     id: number;
@@ -31,6 +32,7 @@
     images: string[];
     tags: string[]; 
     dateRange: string;
+    reservation: string;
 }
 
 let places: Place[] = [];
@@ -46,6 +48,16 @@ let fp;
 
 let dateRangesPrice: { from: string; to: string; price: string }[]
 let totalPrice = 0;
+let emailGuest: string;
+let selectedDates: string[]
+let reserveBool = false;
+
+let country: string = "";
+let city: string = "";
+let maxPrice: number;
+let minPrice: number;
+let dateRangeSearch: string = "";
+
 
   onMount(() => {
 
@@ -192,7 +204,7 @@ async function openDialog(place: Place) {
         return { from: fromFormatted, to: toFormatted, price: range.price };
     });
 
-    console.log(dateRangesFormatted);
+    //console.log("DRF!:",dateRangesFormatted);
 
     fp = flatpickr(`#dateInput`, {
       dateFormat: "d-m-Y", 
@@ -253,7 +265,7 @@ function filterPlacesByCategory(category: string): (event: MouseEvent<HTMLDivEle
 function calculateTotalPrice() {
      totalPrice = 0;
     // @ts-ignore
-    const selectedDates: string[] = fp.selectedDates.map((date: Date) => {
+    selectedDates = fp.selectedDates.map((date: Date) => {
         const formattedDate = date.toLocaleDateString('en-GB');
         const [day, month, year] = formattedDate.split('/');
         return `${day}-${month}-${year}`;
@@ -274,7 +286,6 @@ function calculateTotalPrice() {
             currentDate.setDate(currentDate.getDate() + 1);
         }
     }
-    
     // Convert Date objects back to strings
     const filledDateStrings: string[] = filledDates.map(date => {
         const day = String(date.getDate()).padStart(2, '0');
@@ -282,6 +293,7 @@ function calculateTotalPrice() {
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
     });
+    
 
     const correctedDateRangesPrice = dateRangesPrice.map(obj => {
         return {
@@ -321,14 +333,101 @@ function calculateTotalPrice() {
     }
 
     console.log("Total Price:", totalPrice + "€");
+    if(totalPrice != 0){
+      reserveBool = true;
+    }
 }
 
 
+async function check() {
+    const accessTokenString = sessionStorage.getItem('accessToken');
+    
+    if (accessTokenString) {
+      const accessToken = JSON.parse(accessTokenString);
+      const access_token = accessToken?.access_token;
 
+      try {
+        const response = await fetch('http://127.0.0.1:8000/protected-route/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${access_token}`
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Email of the current user:', result);
+          emailGuest = result;
+          console.log("TP:", totalPrice);
+          console.log("ARR",selectedDates);
+
+          let together = emailGuest + " " + totalPrice.toString() + "€" + " " + selectedDates[0] + " " + selectedDates[1] + " , ";
+          //console.log(together);
+          // @ts-ignore
+          selectedPlace.reservation = selectedPlace.reservation + together;
+          
+          // @ts-ignore
+          updateReservation(selectedPlace.id, selectedPlace.reservation);
+
+        } else {
+          console.error('Failed to fetch user information:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching user information:', error);
+      }
+    } else {
+      console.error('Access token not found in sessionStorage.');
+    }
+  }
+
+  async function updateReservation(placeId: number, reservation: string): Promise<void> {
+  try {
+    console.log("N:", placeId);
+    console.log("R:", reservation);
+    const url = `http://127.0.0.1:8000/updateReservation/${placeId}?reservation=${encodeURIComponent(reservation)}`;
+    const response = await fetch(url, {
+      method: 'PUT',
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(`Failed to update reservation: ${errorMessage}`);
+    }
+
+    console.log('Reservation updated successfully');
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+  }
+}
+
+function searchForPlace(){
+  filteredPlaces = places;
+
+  if(country !== ""){
+    filteredPlaces = filteredPlaces.filter(place => place.country === country);
+  }
+
+  if(city !== ""){
+    filteredPlaces = filteredPlaces.filter(place => place.city === city);
+  }
+
+  //console.log(filteredPlaces);
+}
 </script>
  
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
-  <Card class="mt-64 grid grid-cols-4 gap-6 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 text-center">
+  <Card class="mt-32 grid grid-cols-4 gap-6 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 text-center">
+    <form class="flex gap-2 col-span-4">
+      <Input size="md" placeholder="Country" bind:value = {country}/>
+      <Input size="md" placeholder="City" bind:value = {city}/>
+      <Input size="md" placeholder="Minimal price" bind:value = {minPrice}/>
+      <Input size="md" placeholder="Maximal price" bind:value = {maxPrice}/>
+      <Input size="md" placeholder="Date range" bind:value = {dateRangeSearch}/>
+      <Button class="!p-2.5" on:click={searchForPlace}>
+        <SearchOutline class="w-5 h-5" />
+      </Button>
+    </form>
     <div on:click={filterPlacesByCategory("Apartment")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Apartment");} }}>
@@ -441,13 +540,12 @@ function calculateTotalPrice() {
 
               <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
               <p>Total price: {totalPrice}€</p>
-              <Button>
+              <Button on:click={check} disabled={!reserveBool}>
                 Reserve
               </Button>
 
               <Button color="blue" on:click={closeDialog}>
-                Close
-              </Button>
+                Close</Button>
             </Card>
         </div>
   {/if}

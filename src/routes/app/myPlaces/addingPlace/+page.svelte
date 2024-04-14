@@ -98,6 +98,7 @@ const getDisabledDates = (excludeId: number) => {
     dates: "",
     authorEmail: "",
     images: [] as File[],
+    reservation: "",
   };
 
   async function check() {
@@ -213,7 +214,7 @@ const getDisabledDates = (excludeId: number) => {
 const addPlace = async () => {
     try {
       newPlace.dates = formattedDates.map(({ date, price }) => `${date} for ${price}€`).join(', ');
-      console.log(newPlace.dates);
+      //console.log(newPlace.dates);
       console.log(`Type of newPlace.dates: ${typeof newPlace.dates}`);
 
       const folderName = uuidv4();
@@ -227,7 +228,7 @@ const addPlace = async () => {
         return downloadUrl;
       })
     );
-
+    console.log(newPlace);
       const response = await fetch('http://127.0.0.1:8000/addPlace/', {
         method: 'POST',
         headers: {
