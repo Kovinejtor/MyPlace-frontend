@@ -46,6 +46,8 @@ let isOpen = false;
 // @ts-ignore
 let fp;
 
+
+
 let dateRangesPrice: { from: string; to: string; price: string }[]
 let totalPrice = 0;
 let emailGuest: string;
@@ -159,6 +161,63 @@ const getImagesForOpenedDialog = async () => {
     }
 };
 
+
+function extractDates(reservationString: string): string[] {
+    const dateRegex = /\d{2}-\d{2}-\d{4}/g; // Regular expression to match dates in the format dd-mm-yyyy
+    const dates: string[] = [];
+    
+    const reservations = reservationString.trim().split(/\s*,\s*/); // Split reservations
+    
+    reservations.forEach(reservation => {
+        const matches = reservation.match(dateRegex); // Match dates in the reservation
+        
+        if (matches && matches.length === 2) { 
+            const [startDateStr, endDateStr] = matches;
+            const [startDay, startMonth, startYear] = startDateStr.split('-').map(Number); 
+            const [endDay, endMonth, endYear] = endDateStr.split('-').map(Number); 
+            
+            const startDate = new Date(startYear, startMonth - 1, startDay); 
+            const endDate = new Date(endYear, endMonth - 1, endDay); 
+            
+            let currentDate = new Date(startDate);
+            
+            while (currentDate <= endDate) {
+                // Format the date manually as d-m-y
+                const formattedDate = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`;
+                dates.push(formattedDate); 
+                currentDate.setDate(currentDate.getDate() + 1); 
+            }
+        }
+    });
+    
+    return dates;
+}
+
+function extractDatesFromRanges(dateRanges: { from: string, to: string }[]): string[] {
+    const dates: string[] = [];
+
+    dateRanges.forEach(range => {
+        const [fromDay, fromMonth, fromYear] = range.from.trim().split('-').map(Number);
+        const [toDay, toMonth, toYear] = range.to.trim().split('-').map(Number);
+
+        const startDate = new Date(fromYear, fromMonth - 1, fromDay); // Month is 0-indexed
+        const endDate = new Date(toYear, toMonth - 1, toDay);
+
+        //console.log("Start Date:", startDate);
+        //console.log("End Date:", endDate);
+
+        let currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+            const formattedDate = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`;
+            dates.push(formattedDate);
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    });
+
+    return dates;
+}
+
 async function openDialog(place: Place) {
     const mainDiv = document.getElementById('mainDiv');
     if (mainDiv) {
@@ -173,7 +232,7 @@ async function openDialog(place: Place) {
     isOpen = true;
     
     selectedPlace = place;
-    console.log("Selected dates: ", selectedPlace.dates);
+    //console.log("Selected dates: ", selectedPlace.dates);
     await getImagesForOpenedDialog();
     
     const dateRanges = selectedPlace.dates.split(',').map(dateRange => {
@@ -181,6 +240,17 @@ async function openDialog(place: Place) {
         const [from, to] = datesPart.split(' to ');
         return { from, to };
     });
+    
+    const disableDatesArray = extractDates(selectedPlace.reservation);
+    //console.log(selectedPlace.reservation);
+    console.log("DA: ", disableDatesArray);
+    //console.log("RANGE:", dateRanges);
+    let datesArray = extractDatesFromRanges(dateRanges);
+    console.log("MR: ",datesArray);
+
+    datesArray = datesArray.filter(date => !disableDatesArray.includes(date));
+    console.log("FILTERED:", datesArray);
+
 
     dateRangesPrice = selectedPlace.dates.split(',').map(dateRange => {
       const [datesPart, pricePart] = dateRange.split(' for ');
@@ -210,7 +280,7 @@ async function openDialog(place: Place) {
       dateFormat: "d-m-Y", 
       minDate: "today",
       mode: "range",
-      enable: dateRanges,
+      enable: datesArray,
       onDayCreate: function(dObj, dStr, fp, dayElem) {
         dateRangesFormatted.forEach(range => {
             const startDate = new Date(range.from);
