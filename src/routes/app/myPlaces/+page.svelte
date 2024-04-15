@@ -12,6 +12,10 @@
     let selectedDate: string = "";
     let items: { id: number; name: string; tags: string[]; imageSrc: string; }[] = [];
     const imagesLoaded = writable(false);
+    let filteredReservations: string[] = [];
+
+    const currentDate = new Date();
+
 
     let countries = [
         { value: 'Apartment', name: 'Apartment' },
@@ -70,6 +74,7 @@
     images: string[];
     tags: string[]; 
     dateRange: string;
+    reservation: string;
 }
     let places: Place[] = [];
 
@@ -249,6 +254,7 @@ async function openDialog(place: Place) {
     
     selectedPlace = place;
     await getImagesForOpenedDialog();
+    convertReservation();
     renderDialog();
 
     setTimeout(() => {
@@ -521,6 +527,52 @@ async function deletePlace(placeId: number, folderName: string): Promise<void> {
   }
 }
 
+function convertReservation() {
+    console.log("CURDATE",currentDate);
+    // Check if selectedPlace exists and has a reservation property
+    if (selectedPlace && selectedPlace.reservation) {
+        let reservationString = selectedPlace.reservation.trim();
+        
+        // Trim the trailing comma if it exists
+        if (reservationString.endsWith(',')) {
+            reservationString = reservationString.slice(0, -1);
+        }
+
+        // Split the string by comma and trim any extra whitespace
+        const reservations = reservationString.split(',').map(reservation => reservation.trim());
+
+        // Format each reservation string
+        const formattedReservations = reservations.map(reservation => {
+            const [email, price, startDate, endDate] = reservation.split(' ');
+            return ` - ${email} for ${price} from ${startDate} to ${endDate}`;
+        });
+
+        console.log(formattedReservations);
+
+        filteredReservations = formattedReservations.filter(reservation => {
+            
+            const endDateString = reservation.split(' to ')[1];
+            console.log("End Date String:", endDateString); 
+            
+            const [dayStr, monthStr, yearStr] = endDateString.split('-');
+            const day = parseInt(dayStr, 10);
+            const month = parseInt(monthStr, 10) - 1; 
+            const year = parseInt(yearStr, 10);
+            
+            const endDate = new Date(year, month, day);
+            
+            console.log("End Date:", endDate);
+            
+            return endDate > currentDate;
+        });
+
+        console.log("FILTERED:",filteredReservations);
+    } else {
+        console.log("selectedPlace or selectedPlace.reservation is null or undefined.");
+    }
+}
+
+
 </script>
 
 
@@ -567,9 +619,13 @@ async function deletePlace(placeId: number, folderName: string): Promise<void> {
 {#if isOpen}
     {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+            <Card class="mt-[1300px] md:mt-[1200px] lg:mt-[1200px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
                 <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
+                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Reservations:</p>
+                {#each filteredReservations as reservation}
+                    <p class="md:col-span-2 lg:col-span-2 text-center">{reservation}</p>
+                {/each}
                 <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Location: {selectedPlace.country}, {selectedPlace.city}, {selectedPlace.adress}</p>
 
                 <div>
