@@ -33,6 +33,7 @@
     tags: string[]; 
     dateRange: string;
     reservation: string;
+    review: string;
 }
 
 let places: Place[] = [];
@@ -610,7 +611,7 @@ function searchForPlace(){
 
               <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
               <p>Total price: {totalPrice}€</p>
-              <Button on:click={check} disabled={!reserveBool}>
+              <Button href="/app/journeyLog" on:click={check} disabled={!reserveBool}>
                 Reserve
               </Button>
 

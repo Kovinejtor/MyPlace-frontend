@@ -99,6 +99,7 @@ const getDisabledDates = (excludeId: number) => {
     authorEmail: "",
     images: [] as File[],
     reservation: "",
+    review: "",
   };
 
   async function check() {

@@ -75,6 +75,7 @@
     tags: string[]; 
     dateRange: string;
     reservation: string;
+    review: string;
 }
     let places: Place[] = [];
 
@@ -529,19 +530,15 @@ async function deletePlace(placeId: number, folderName: string): Promise<void> {
 
 function convertReservation() {
     console.log("CURDATE",currentDate);
-    // Check if selectedPlace exists and has a reservation property
     if (selectedPlace && selectedPlace.reservation) {
         let reservationString = selectedPlace.reservation.trim();
         
-        // Trim the trailing comma if it exists
         if (reservationString.endsWith(',')) {
             reservationString = reservationString.slice(0, -1);
         }
 
-        // Split the string by comma and trim any extra whitespace
         const reservations = reservationString.split(',').map(reservation => reservation.trim());
 
-        // Format each reservation string
         const formattedReservations = reservations.map(reservation => {
             const [email, price, startDate, endDate] = reservation.split(' ');
             return ` - ${email} for ${price} from ${startDate} to ${endDate}`;

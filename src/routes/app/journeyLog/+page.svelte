@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import {Card, Button, Input, Search} from 'flowbite-svelte';
+    import {Card, Button, Input, Search, Textarea} from 'flowbite-svelte';
     import { writable } from 'svelte/store';
     import { storage } from '../../../firebase';
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
@@ -8,9 +8,13 @@
     let emailGuest: string;
     let justOnce = true;
     let isOpen = false;
+    let isOpenSecond = false;
     let showImage:boolean = false;
+    let openWindow:boolena = false;
 
     let currentIndex = 0;
+    let filteredReservations: string[] = [];
+
 
     interface Place {
         id: number;
@@ -36,6 +40,7 @@
         tags: string[]; 
         dateRange: string;
         reservation: string;
+        review: string;
         }
 
         
@@ -50,7 +55,21 @@
     const currentDate = new Date();
     const formattedDate = currentDate.toISOString().split('T')[0];
 
+    let textareaprops = {
+        id: 'message',
+        name: 'message',
+        label: 'Your message',
+        rows: 4,
+        placeholder: 'Write a review about the place'
+    };
+
+
     onMount(() => {
+        if(openWindow == true){
+            openWindow = false;
+            window.location.reload();
+        }
+   
         check();
     });
 
@@ -195,8 +214,41 @@ async function openDialog(place: Place) {
     isOpen = true;
     
     selectedPlace = place;
+    convertReservation();
     await getImagesForOpenedDialog();
 }
+
+async function openDialogSecondCard(place: Place) {
+    const mainDiv = document.getElementById('mainDiv');
+    if (mainDiv) {
+        mainDiv.classList.add('blur-lg');
+    }
+
+    const secondMainCard = document.getElementById('secondMainCard');
+        if (secondMainCard) {
+            secondMainCard.classList.add('h-screen');
+    }
+
+    isOpenSecond = true;
+    
+    selectedPlace = place;
+    await getImagesForOpenedDialog();
+}
+
+function closeDialogSecondCard() {
+    const mainDiv = document.getElementById('mainDiv');
+    if (mainDiv) {
+        mainDiv.classList.remove('blur-lg');
+    }
+
+    const secondMainCard = document.getElementById('secondMainCard');
+        if (secondMainCard) {
+            secondMainCard.classList.remove('h-screen');
+    }
+
+    isOpenSecond = false;
+    showImage = false;
+  }
 
 const getImagesForOpenedDialog = async () => {
     if (!selectedPlace || !selectedPlace.folder) {
@@ -251,12 +303,102 @@ function closeDialog() {
     isOpen = false;
     showImage = false;
   }
+
+  function convertReservation() {
+    //console.log("CURDATE",currentDate);
+    if (selectedPlace && selectedPlace.reservation) {
+        let reservationString = selectedPlace.reservation.trim();
+        
+        if (reservationString.endsWith(',')) {
+            reservationString = reservationString.slice(0, -1);
+        }
+
+        const reservations = reservationString.split(',').map(reservation => reservation.trim());
+
+        const formattedReservations = reservations.map(reservation => {
+            const [email, price, startDate, endDate] = reservation.split(' ');
+            return ` - ${email} for ${price} from ${startDate} to ${endDate}`;
+        });
+
+        //console.log(formattedReservations);
+
+        filteredReservations = formattedReservations.filter(reservation => {
+            
+            const endDateString = reservation.split(' to ')[1];
+            //console.log("End Date String:", endDateString); 
+            
+            const [dayStr, monthStr, yearStr] = endDateString.split('-');
+            const day = parseInt(dayStr, 10);
+            const month = parseInt(monthStr, 10) - 1; 
+            const year = parseInt(yearStr, 10);
+            
+            const endDate = new Date(year, month, day);
+            
+            //console.log("End Date:", endDate);
+            
+            return endDate > currentDate;
+        });
+
+        filteredReservations = filteredReservations.filter(reservation => {
+            return reservation.includes(emailGuest);
+        });
+
+        filteredReservations = filteredReservations.map(reservation => {
+            return reservation.replace(emailGuest, "You reserved");
+        });
+        console.log("FILTERED:",filteredReservations);
+    } else {
+        console.log("selectedPlace or selectedPlace.reservation is null or undefined.");
+    }
+}
+
+async function cancelReservation(reservation: string){
+    console.log(reservation);
+    console.log(selectedPlace?.reservation);
+
+    const datesRegex = /from (\d{2}-\d{2}-\d{4}) to (\d{2}-\d{2}-\d{4})/;
+    const matches = reservation.match(datesRegex);
+
+    if (matches && matches.length >= 3) {
+        const fromDate = matches[1];
+        const toDate = matches[2];
+
+        // Constructing a regex pattern to remove entries containing the dates
+        const removePattern = new RegExp(`[^,]*${fromDate}[^,]*${toDate}[^,]*,?`, "g");
+        
+        // Removing entries containing the dates from selectedPlaceReservation
+        const newSelectedPlaceReservation = selectedPlace?.reservation.replace(removePattern, '');
+
+        console.log(newSelectedPlaceReservation);
+        console.log(selectedPlace?.id);
+
+        try {
+            const url = `http://127.0.0.1:8000/updateReservation/${selectedPlace?.id ?? ''}?reservation=${encodeURIComponent(newSelectedPlaceReservation ?? '')}`;
+            const response = await fetch(url, {
+                method: 'PUT',
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Failed to cancel reservation: ${errorMessage}`);
+            }
+            window.location.reload();
+            console.log('Reservation canceled successfully');
+        } catch (error) {
+            console.error('Error canceling reservation:', error);
+        }
+    } else {
+        console.log("Invalid reservation format");
+    }
+}
 </script>
 
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14 mt-[80px]">
-    {#if $imagesLoaded && beforeToday.length !== 0}
-        <Card  id="mainCard" class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-24">
-                {#each beforeToday as place (place.id)}
+    
+    {#if $imagesLoaded && afterToday.length !== 0}
+        <Card class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-28 mt-16">
+            <h1 class="text-4xl font-bold text-center md:col-span-3 lg:col-span-3 mb-8">Places that you reserved</h1>
+                {#each afterToday as place (place.id)}
                     <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           openDialog(place);} }} class="max-w-sm rounded overflow-hidden shadow-lg hover:outline">
@@ -271,13 +413,16 @@ function closeDialog() {
                         </div>
                     </div>
                 {/each}
+            
         </Card>
     {/if} 
-    {#if $imagesLoaded && afterToday.length !== 0}
-        <Card class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-28">
-            
-                {#each afterToday as place (place.id)}
-                    <div class="max-w-sm rounded overflow-hidden shadow-lg hover:outline">
+    {#if $imagesLoaded && beforeToday.length !== 0}
+        <Card id="secondMainCard" class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-24">
+                <h1 class="text-4xl font-bold text-center md:col-span-3 lg:col-span-3 mb-8">Write a review about the places you rented</h1>
+                {#each beforeToday as place (place.id)}
+                    <div class="max-w-sm rounded overflow-hidden shadow-lg hover:outline" on:click={() => openDialogSecondCard(place)} role="button" tabindex="0" on:keydown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          openDialogSecondCard(place);} }} >
                         <img class="w-full h-48" src={place.image} alt="">
                         <div class="px-6 py-4">
                             <div class="font-bold text-xl mb-2">{place.name}</div>
@@ -289,7 +434,6 @@ function closeDialog() {
                         </div>
                     </div>
                 {/each}
-            
         </Card>
     {/if} 
 </div>
@@ -300,8 +444,16 @@ function closeDialog() {
   {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
             <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
+              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
+              
+              {#each filteredReservations as reservation}
+                <div class="grid grid-cols-4 col-span-2">
+                    <p class="col-span-3">{reservation}</p>
+                        <Button color="red" class="col-span-1 mb-4" on:click={() => cancelReservation(reservation)}>Cancel reservation</Button>
+                </div>  
+              {/each}
 
+              <p class="text-center mt-5">Email of the place owner: {selectedPlace.authorEmail}</p>
               <p class="text-center mt-5">Country: {selectedPlace.country}</p>
               <p class="text-center mt-5">City: {selectedPlace.city}</p>
               <p class="text-center mt-5">Adress: {selectedPlace.adress}</p>
@@ -331,12 +483,54 @@ function closeDialog() {
                 </div>
               {/if}
 
-              
-              <Button>
-                Cancel reservation
-              </Button>
 
               <Button color="blue" on:click={closeDialog}>
+                Close</Button>
+            </Card>
+        </div>
+  {/if}
+{/if}
+
+
+{#if isOpenSecond}
+  {#if selectedPlace}
+        <div class="absolute inset-0 flex justify-center items-center">
+            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
+              <Textarea class="md:col-span-2 lg:col-span-2" {...textareaprops}/>
+
+              <p class="text-center mt-5">Email of the place owner: {selectedPlace.authorEmail}</p>
+              <p class="text-center mt-5">Country: {selectedPlace.country}</p>
+              <p class="text-center mt-5">City: {selectedPlace.city}</p>
+              <p class="text-center mt-5">Adress: {selectedPlace.adress}</p>
+              
+              <p class="text-center mt-5">Maximum number of people: {selectedPlace.maxPeople}</p>
+              <p class="text-center mt-5">Number of beds: {selectedPlace.beds}</p>
+              <p class="text-center mt-5">Number of adults: {selectedPlace.adults}</p>
+              
+
+              <p class="text-center mt-5">Number of children: {selectedPlace.children}</p>
+              <p class="text-center mt-5">Are animals allowed?: {selectedPlace.animals}</p>
+              <p class="text-center mt-5">Is there a parking?: {selectedPlace.parking}</p>
+
+              <p class="text-center mt-5">Minimum nights per reservation: {selectedPlace.minNight}</p>
+              <p class="col-span-2 text-center mt-5">Description: {selectedPlace.description}</p>
+
+              <p class="text-center col-span-2 text-3xl font-bold mt-12">Images of the place</p>
+              {#if showImage}
+                <div class="relative col-span-2">
+                  <img src={selectedPlace.images[currentIndex]} class="w-[1200px] h-96" alt="">
+                  <button on:click={goToPrev} class="absolute top-1/2 left-4 transform -translate-y-1/2 w-12 h-12 bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+                    &lt;
+                  </button>
+                  <button on:click={goToNext} class="absolute top-1/2 right-4 transform -translate-y-1/2 w-12 h-12 bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+                    &gt;
+                  </button>
+                </div>
+              {/if}
+
+
+              <Button color="blue" on:click={closeDialogSecondCard}>
                 Close</Button>
             </Card>
         </div>
