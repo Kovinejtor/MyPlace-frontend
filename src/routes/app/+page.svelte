@@ -61,6 +61,8 @@ let maxPrice: number;
 let minPrice: number;
 let dateRangeSearch: string = "";
 
+let reviews: string[] = [];
+
 
   onMount(() => {
 
@@ -219,6 +221,18 @@ function extractDatesFromRanges(dateRanges: { from: string, to: string }[]): str
     return dates;
 }
 
+ function formatReviews() {
+    // Regular expression to match the contents inside square brackets
+    const regex = /\[(.*?)\]/g;
+    let match;
+     // @ts-ignore
+    while ((match = regex.exec(selectedPlace?.review)) !== null) {
+        reviews.push(`- Review grade: ${match[1].split(' ')[0]} Description: ${match[1].substring(match[1].indexOf(' ') + 1)}`);
+    }
+
+    console.log(reviews);
+}
+
 async function openDialog(place: Place) {
     const mainDiv = document.getElementById('mainDiv');
     if (mainDiv) {
@@ -235,6 +249,7 @@ async function openDialog(place: Place) {
     selectedPlace = place;
     //console.log("Selected dates: ", selectedPlace.dates);
     await getImagesForOpenedDialog();
+    formatReviews();
     
     const dateRanges = selectedPlace.dates.split(',').map(dateRange => {
         const [datesPart, pricePart] = dateRange.split(' for ');
@@ -617,6 +632,9 @@ function searchForPlace(){
 
               <Button color="blue" on:click={closeDialog}>
                 Close</Button>
+                {#each reviews as review}
+                    <p class="md:col-span-2 lg:col-span-2 text-center">{review}</p>
+                {/each}
             </Card>
         </div>
   {/if}

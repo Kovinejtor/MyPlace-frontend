@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import {Card, Button, Input, Search, Textarea} from 'flowbite-svelte';
+    import {Card, Button, Input, Search, Textarea, Label} from 'flowbite-svelte';
     import { writable } from 'svelte/store';
     import { storage } from '../../../firebase';
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
@@ -10,10 +10,14 @@
     let isOpen = false;
     let isOpenSecond = false;
     let showImage:boolean = false;
-    let openWindow:boolena = false;
+   
 
     let currentIndex = 0;
     let filteredReservations: string[] = [];
+    let review: string;
+    let reviewGrade: number;
+    let reviewButton: boolean = true;
+    let completeReview: string;
 
 
     interface Place {
@@ -65,10 +69,6 @@
 
 
     onMount(() => {
-        if(openWindow == true){
-            openWindow = false;
-            window.location.reload();
-        }
    
         check();
     });
@@ -391,6 +391,78 @@ async function cancelReservation(reservation: string){
         console.log("Invalid reservation format");
     }
 }
+
+$: {
+    if(review != undefined && reviewGrade != undefined){
+        reviewButton = false;
+        completeReview = selectedPlace?.review + "[" + reviewGrade.toString() + " " + review + "], ";
+        console.log(completeReview);
+    }
+  }
+
+async function sendReview(){
+    console.log(review);
+    console.log(reviewGrade);
+
+    try {
+            const url = `http://127.0.0.1:8000/updateReview/${selectedPlace?.id ?? ''}?review=${encodeURIComponent(completeReview ?? '')}`;
+            const response = await fetch(url, {
+                method: 'PUT',
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Failed to send review: ${errorMessage}`);
+            }
+
+            console.log('Review sent successfully');
+
+
+        } catch (error) {
+            console.error('Error sending review:', error);
+        }
+    
+    deleteReviewedReservations();
+    
+}
+
+async function deleteReviewedReservations() {
+    //console.log("RESERVATION:", selectedPlace?.reservation);
+    //console.log("EMAIL:", emailGuest);
+
+    const currentDate = new Date();
+
+    const currentUserReservations = selectedPlace?.reservation.split(',')
+        .filter(reservation => {
+            const endDate = new Date(reservation.split(' ')[3]);
+            return reservation.includes(emailGuest) && endDate > currentDate;
+        });
+
+    const remainingReservations = selectedPlace?.reservation.split(',')
+        .filter(reservation => !currentUserReservations?.some(currentUserReservation => currentUserReservation.trim() === reservation.trim()));
+
+    const updatedReservation = remainingReservations?.join(',').trim();
+    console.log("Updated RESERVATION:", updatedReservation);
+   
+    try {
+            const url = `http://127.0.0.1:8000/updateReservation/${selectedPlace?.id ?? ''}?reservation=${encodeURIComponent(updatedReservation ?? '')}`;
+            const response = await fetch(url, {
+                method: 'PUT',
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Failed remove old reservation: ${errorMessage}`);
+            }
+        
+            console.log('Old reservation removed successfully');
+        } catch (error) {
+            console.error('Error removing old reservation:', error);
+        }
+    window.location.reload();
+}
+
+
 </script>
 
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14 mt-[80px]">
@@ -497,7 +569,13 @@ async function cancelReservation(reservation: string){
         <div class="absolute inset-0 flex justify-center items-center">
             <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
               <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
-              <Textarea class="md:col-span-2 lg:col-span-2" {...textareaprops}/>
+              <Textarea bind:value={review} class="md:col-span-2 lg:col-span-2" {...textareaprops}/>
+              <div>
+                <Label class="text-white mb-1">Rate the place from 1 to 10</Label>
+                <Input bind:value={reviewGrade} type="number" min="1" max="10"/>
+              </div>
+              <Button on:click={sendReview} disabled={reviewButton}>Send review</Button>
+              <Button on:click={deleteReviewedReservations}>hej</Button>
 
               <p class="text-center mt-5">Email of the place owner: {selectedPlace.authorEmail}</p>
               <p class="text-center mt-5">Country: {selectedPlace.country}</p>
