@@ -403,18 +403,18 @@ const handleSecondInput = (event: Event, id: number) => {
               <CalendarMonthSolid slot="left" />
           </Input>
         </div>
-        <div class="mt-1 md:mt-0 lg:mt-0">
+        <div class="mt-3 md:mt-0 lg:mt-0">
           <Input bind:value={dateInputs[0].price} placeholder="Price per night in €" class="w-48 h-10" on:input={handleInput}>
           </Input>
         </div>
         {#each dateInputs as { id, date, price } (id)}
           {#if id !== 1}
-            <div class="mt-3 md:mt-0 lg:mt-0">
-                <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class="mt-2 w-15">
+            <div class="mt-3">
+                <Input on:input={() => isFormValid()} type="text" id={`datepicker-${id}`} bind:value={date} placeholder="Click here to select a date" class=" w-15">
                     <CalendarMonthSolid slot="left" />
                 </Input>
             </div>
-            <div class="mt-1 md:mt-0 lg:mt-0">
+            <div class="mt-3">
               <Input bind:value={price} placeholder="Price per night in €" class="w-48 h-10" on:input={(event) => handleSecondInput(event, id)}>
               </Input>                                  
             </div>

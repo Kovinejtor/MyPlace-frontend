@@ -57,9 +57,10 @@ let reserveBool = false;
 
 let country: string = "";
 let city: string = "";
-let maxPrice: number;
-let minPrice: number;
-let dateRangeSearch: string = "";
+let maxPeople: number;
+let bedNumber: number;
+let childrenNumber: number;
+let reviewCheck: boolean = false;
 
 let reviews: string[] = [];
 
@@ -225,15 +226,22 @@ function extractDatesFromRanges(dateRanges: { from: string, to: string }[]): str
     // Regular expression to match the contents inside square brackets
     const regex = /\[(.*?)\]/g;
     let match;
+    console.log("For this review",selectedPlace?.review);
+    
      // @ts-ignore
     while ((match = regex.exec(selectedPlace?.review)) !== null) {
-        reviews.push(`- Review grade: ${match[1].split(' ')[0]} Description: ${match[1].substring(match[1].indexOf(' ') + 1)}`);
+        reviews.push(`- Review grade: ${match[1].split(' ')[0]}, Description: ${match[1].substring(match[1].indexOf(' ') + 1)}`);
     }
 
-    console.log(reviews);
+    console.log("Review",reviews);
+    if(reviews.length != 0){
+      reviewCheck = true;
+    }
+
 }
 
 async function openDialog(place: Place) {
+    reviews = [];
     const mainDiv = document.getElementById('mainDiv');
     if (mainDiv) {
         mainDiv.classList.add('blur-lg');
@@ -259,13 +267,13 @@ async function openDialog(place: Place) {
     
     const disableDatesArray = extractDates(selectedPlace.reservation);
     //console.log(selectedPlace.reservation);
-    console.log("DA: ", disableDatesArray);
+    //console.log("DA: ", disableDatesArray);
     //console.log("RANGE:", dateRanges);
     let datesArray = extractDatesFromRanges(dateRanges);
-    console.log("MR: ",datesArray);
+    //console.log("MR: ",datesArray);
 
     datesArray = datesArray.filter(date => !disableDatesArray.includes(date));
-    console.log("FILTERED:", datesArray);
+    //console.log("FILTERED:", datesArray);
 
 
     dateRangesPrice = selectedPlace.dates.split(',').map(dateRange => {
@@ -317,8 +325,15 @@ function closeDialog() {
     if (mainDiv) {
         mainDiv.classList.remove('blur-lg');
     }
+
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) {
+        mainCard.classList.remove('h-screen');
+    }
+
     isOpen = false;
     showImage = false;
+    reviewCheck = false;
   }
 
   let currentIndex = 0;
@@ -498,18 +513,32 @@ function searchForPlace(){
     filteredPlaces = filteredPlaces.filter(place => place.city === city);
   }
 
+  if(maxPeople != undefined){
+    filteredPlaces = filteredPlaces.filter(place => place.maxPeople == maxPeople);
+  }
+
+  if(bedNumber != undefined){
+    filteredPlaces = filteredPlaces.filter(place => place.beds == bedNumber);
+  }
+
+  if(childrenNumber != undefined){
+    filteredPlaces = filteredPlaces.filter(place => place.children == childrenNumber);
+  }
+
   //console.log(filteredPlaces);
 }
 </script>
  
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
-  <Card class="mt-32 grid grid-cols-4 gap-6 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 text-center">
-    <form class="flex gap-2 col-span-4">
+  <Card class="mt-32 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 text-center">
+    <form class="flex gap-2 col-span-2">
       <Input size="md" placeholder="Country" bind:value = {country}/>
       <Input size="md" placeholder="City" bind:value = {city}/>
-      <Input size="md" placeholder="Minimal price" bind:value = {minPrice}/>
-      <Input size="md" placeholder="Maximal price" bind:value = {maxPrice}/>
-      <Input size="md" placeholder="Date range" bind:value = {dateRangeSearch}/>
+      <Input size="md" placeholder="Maximum number of people" bind:value = {maxPeople}/>
+    </form>
+    <form class="flex gap-2 col-span-2">
+      <Input size="md" placeholder="Number of beds" bind:value = {bedNumber}/>
+      <Input size="md" placeholder="Number of children" bind:value = {childrenNumber}/>
       <Button class="!p-2.5" on:click={searchForPlace}>
         <SearchOutline class="w-5 h-5" />
       </Button>
@@ -517,55 +546,55 @@ function searchForPlace(){
     <div on:click={filterPlacesByCategory("Apartment")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Apartment");} }}>
-      <img src="/apartments.jpg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+      <img src="/apartments.jpg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
       <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Apartments</p>
     </div>
     <div on:click={filterPlacesByCategory("Hotel")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Hotel");} }}>
-        <img src="/hotels.jpg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/hotels.jpg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Hotels</p>
     </div>
     <div on:click={filterPlacesByCategory("Hostel")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Hostel");} }}>
-        <img src="/hostels.jpg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/hostels.jpg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Hostels</p>
     </div>
     <div on:click={filterPlacesByCategory("Motel")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Motel");} }}>
-        <img src="/motels.jpeg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/motels.jpeg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Motels</p>
     </div>
     <div on:click={filterPlacesByCategory("Villa")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Villa");} }}>
-        <img src="/villas.jpeg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/villas.jpeg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Villas</p>
     </div>
     <div on:click={filterPlacesByCategory("Cabin")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Cabin");} }}>
-        <img src="/cabins.jpeg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/cabins.jpeg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Cabins</p>
     </div>
     <div on:click={filterPlacesByCategory("Cottage")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("Cottage");} }}>
-        <img src="/cottages.jpg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+        <img src="/cottages.jpg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
         <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">Cottages</p>
     </div>
     <div on:click={filterPlacesByCategory("All places")} role="button" tabindex="0" class="relative group" on:keydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         filterPlacesByCategory("All places");} }}>
-      <img src="/resorts.jpeg" class="rounded-lg h-48 w-64 hover:outline" alt="product 1"/>
+      <img src="/resorts.jpeg" class="rounded-lg h-40 w-48 md:h-48 md:w-64 lg:h-48 lg:w-64 hover:outline" alt="product 1"/>
       <p class="absolute top-0 left-0 bg-berkeley-blue text-white px-2 py-1 rounded-tr-lg border-white border-2">All places</p>
     </div>
   </Card>
 
   {#if filteredPlaces.length !== 0}
-    <Card class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-28">
+    <Card class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-28">
       {#if $imagesLoaded}
         {#each filteredPlaces as place (place.id)}
               <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
@@ -584,7 +613,12 @@ function searchForPlace(){
             {/each}
         {/if}
   </Card>
-{/if} 
+{/if}
+
+{#if isOpen}
+  <div class="h-[650px]">
+  </div>
+  {/if}
 </div>
 
 
@@ -592,8 +626,8 @@ function searchForPlace(){
 {#if isOpen}
   {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
+            <Card class="mt-[1800px] md:mt-[1200px] lg:mt-[1200px] grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+              <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
               <p class="text-center mt-5">Country: {selectedPlace.country}</p>
               <p class="text-center mt-5">City: {selectedPlace.city}</p>
@@ -624,6 +658,8 @@ function searchForPlace(){
                 </div>
               {/if}
 
+              <p class="text-center col-span-2 text-3xl font-bold mt-12">Dates and prices</p>
+
               <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
               <p>Total price: {totalPrice}€</p>
               <Button href="/app/journeyLog" on:click={check} disabled={!reserveBool}>
@@ -632,9 +668,12 @@ function searchForPlace(){
 
               <Button color="blue" on:click={closeDialog}>
                 Close</Button>
-                {#each reviews as review}
-                    <p class="md:col-span-2 lg:col-span-2 text-center">{review}</p>
-                {/each}
+                {#if reviewCheck}
+                  <p class="text-center col-span-2 text-3xl font-bold mt-12">Reviews and scores(0-10)</p>
+                  {#each reviews as review}
+                      <p class="md:col-span-2 lg:col-span-2">{review}</p>
+                  {/each}
+                {/if}
             </Card>
         </div>
   {/if}

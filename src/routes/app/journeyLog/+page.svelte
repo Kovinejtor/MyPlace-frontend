@@ -468,12 +468,12 @@ async function deleteReviewedReservations() {
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14 mt-[80px]">
     
     {#if $imagesLoaded && afterToday.length !== 0}
-        <Card class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-28 mt-16">
-            <h1 class="text-4xl font-bold text-center md:col-span-3 lg:col-span-3 mb-8">Places that you reserved</h1>
+        <Card class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-28 mt-16">
+            <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-3 lg:col-span-3 mb-8">Places that you reserved</h1>
                 {#each afterToday as place (place.id)}
                     <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
-                          openDialog(place);} }} class="max-w-sm rounded overflow-hidden shadow-lg hover:outline">
+                          openDialog(place);} }} class="max-w-sm rounded overflow-hidden shadow-lg hover:outline col-span-2">
                         <img class="w-full h-48" src={place.image} alt="">
                         <div class="px-6 py-4">
                             <div class="font-bold text-xl mb-2">{place.name}</div>
@@ -489,10 +489,10 @@ async function deleteReviewedReservations() {
         </Card>
     {/if} 
     {#if $imagesLoaded && beforeToday.length !== 0}
-        <Card id="secondMainCard" class="grid grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-24">
-                <h1 class="text-4xl font-bold text-center md:col-span-3 lg:col-span-3 mb-8">Write a review about the places you rented</h1>
+        <Card id="secondMainCard" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-24">
+                <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-3 lg:col-span-3 mb-8">Write a review about the places you rented</h1>
                 {#each beforeToday as place (place.id)}
-                    <div class="max-w-sm rounded overflow-hidden shadow-lg hover:outline" on:click={() => openDialogSecondCard(place)} role="button" tabindex="0" on:keydown={(event) => {
+                    <div class="max-w-sm rounded overflow-hidden shadow-lg hover:outline col-span-2" on:click={() => openDialogSecondCard(place)} role="button" tabindex="0" on:keydown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           openDialogSecondCard(place);} }} >
                         <img class="w-full h-48" src={place.image} alt="">
@@ -508,6 +508,11 @@ async function deleteReviewedReservations() {
                 {/each}
         </Card>
     {/if} 
+
+    {#if isOpen}
+     <div class="h-[1100px]">
+     </div>
+    {/if}
 </div>
 
 
@@ -515,8 +520,8 @@ async function deleteReviewedReservations() {
 {#if isOpen}
   {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
+            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+              <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
               
               {#each filteredReservations as reservation}
                 <div class="grid grid-cols-4 col-span-2">
@@ -567,8 +572,8 @@ async function deleteReviewedReservations() {
 {#if isOpenSecond}
   {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-              <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
+            <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+              <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
               <Textarea bind:value={review} class="md:col-span-2 lg:col-span-2" {...textareaprops}/>
               <div>
                 <Label class="text-white mb-1">Rate the place from 1 to 10</Label>

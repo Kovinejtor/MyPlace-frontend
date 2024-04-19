@@ -574,7 +574,7 @@ function convertReservation() {
 
 
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
-    <Card id="mainCard"class="bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-28 text-center">
+    <Card class="bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-28 text-center">
         {#if count === 0}
             <p>You currently don't have any of your own places in the catalog that other people can rent.</p>
         {:else if count === 1}
@@ -609,6 +609,11 @@ function convertReservation() {
         {/if}
       </Card>
      {/if}
+
+    {#if isOpen}
+     <div class="h-[1100px]">
+     </div>
+    {/if}
     </div>
 </div>
 
@@ -616,10 +621,10 @@ function convertReservation() {
 {#if isOpen}
     {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1200px] lg:mt-[1200px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+            <Card class="mt-[1300px] md:mt-[1400px] lg:mt-[1400px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
                 <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
-                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Reservations:</p>
+                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Reservationsss:</p>
                 {#each filteredReservations as reservation}
                     <p class="md:col-span-2 lg:col-span-2 text-center">{reservation}</p>
                 {/each}
@@ -691,6 +696,7 @@ function convertReservation() {
                   </Button>
 
             </Card>
+  
         </div>
     {/if}
 {/if}
