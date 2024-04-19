@@ -14,11 +14,11 @@
     let checkboxValue:boolean;
 
     onMount(() => {
-        check();
+        getUserInfo();
     });
 
   
-  async function check() {
+  async function getUserInfo() {
     const accessTokenString = sessionStorage.getItem('accessToken');
     
     if (accessTokenString) {
@@ -59,10 +59,10 @@
         } catch (error) {
             console.error('Error fetching user information:', error);
         }
-    } else {
+     } else {
         console.error('Access token not found in sessionStorage.');
+        }
     }
-}
 
 
     async function deleteAccount() {
@@ -112,7 +112,7 @@
         if (mainDiv) {
             mainDiv.classList.add('blur-lg');
         }
-        }
+    }
 
     const closeDialogForAccountDelete = async () => {
         const myDialog = document.getElementById('myDialog') as HTMLDialogElement;
@@ -177,4 +177,4 @@
         <Button on:click={closeDialogForAccountDelete} color="blue">Close</Button>    
       </div>
     </div>
-  </dialog>
+</dialog>

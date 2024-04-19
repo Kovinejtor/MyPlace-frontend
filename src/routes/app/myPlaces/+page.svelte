@@ -1,8 +1,8 @@
 <script lang="ts">
     import {Card, Button, Label, Select, Textarea, Input} from 'flowbite-svelte';
-    import { onMount, afterUpdate, createEventDispatcher  } from 'svelte';
-    import { app, storage } from '../../../firebase';
-    import { getStorage, ref, uploadBytes, getDownloadURL, listAll, getMetadata, deleteObject} from 'firebase/storage';
+    import { onMount, createEventDispatcher  } from 'svelte';
+    import { storage } from '../../../firebase';
+    import { ref, uploadBytes, getDownloadURL, listAll, getMetadata, deleteObject} from 'firebase/storage';
     import { writable } from 'svelte/store';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
@@ -568,8 +568,6 @@ function convertReservation() {
         console.log("selectedPlace or selectedPlace.reservation is null or undefined.");
     }
 }
-
-
 </script>
 
 
@@ -591,6 +589,7 @@ function convertReservation() {
      {#if count!=0}
       <Card class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-2xl bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-16">
         {#if $imagesLoaded}
+        <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2 mb-3">Places that you put in the catalog</h1>
           {#each places as place (place.id)}
             <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -622,13 +621,13 @@ function convertReservation() {
     {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
             <Card class="mt-[1300px] md:mt-[1400px] lg:mt-[1400px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-                <h1 class="text-3xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
+                <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
-                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Reservationsss:</p>
+                <p class="md:col-span-2 lg:col-span-2 text-center mt-8 text-2xl font-bold">Reservations:</p>
                 {#each filteredReservations as reservation}
                     <p class="md:col-span-2 lg:col-span-2 text-center">{reservation}</p>
                 {/each}
-                <p class="md:col-span-2 lg:col-span-2 text-center mt-8">Location: {selectedPlace.country}, {selectedPlace.city}, {selectedPlace.adress}</p>
+                <p class="md:col-span-2 lg:col-span-2 text-center mt-8"><strong>Location:</strong> {selectedPlace.country}, {selectedPlace.city}, {selectedPlace.adress}</p>
 
                 <div>
                     <Label class="text-white mb-1">Maximum number of people</Label>
@@ -665,16 +664,14 @@ function convertReservation() {
                     <Textarea {...textareaprops} bind:value={selectedPlace.description}/>
                   </div>
 
-
-                  <div id="images-container" class="md:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2"></div>
+                  <p class="md:col-span-2 lg:col-span-2 text-center mt-8 text-3xl font-bold">Images of the place</p>
+                  <div id="images-container" class="md:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2 mt-2"></div>
                   <div class="md:col-span-2 lg:col-span-2 w-80 flex justify-center items-center">
                     <Button color="blue" on:click={openFileInput}>Add image</Button>
                     <input type="file" id="image-upload" class="hidden" multiple on:change={handleImageUpload}/>
                   </div>
 
-
-                  
-
+                  <p class="md:col-span-2 lg:col-span-2 text-center mt-8 text-3xl font-bold">Dates and prices</p>
                   {#each datePricePairs as { dateRange, price }, index}
                       <div>
                           <Input on:change={() => { updateDisabledRanges()}} bind:value={dateRange} type="text" id={"datepicker-" + index} placeholder="Click here to select a date" class="rounded-md w-15">
@@ -694,9 +691,7 @@ function convertReservation() {
                   <Button color="blue" on:click={closeDialog}>
                     Close
                   </Button>
-
             </Card>
-  
         </div>
     {/if}
 {/if}

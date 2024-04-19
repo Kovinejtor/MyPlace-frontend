@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import {Card, Button, Input, Search, Textarea, Label} from 'flowbite-svelte';
+    import {Card, Button, Input, Textarea, Label} from 'flowbite-svelte';
     import { writable } from 'svelte/store';
     import { storage } from '../../../firebase';
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
@@ -45,7 +45,7 @@
         dateRange: string;
         reservation: string;
         review: string;
-        }
+    }
 
         
     let places: Place[] = [];
@@ -57,7 +57,6 @@
     const imagesLoaded = writable(false);
 
     const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().split('T')[0];
 
     let textareaprops = {
         id: 'message',
@@ -69,12 +68,11 @@
 
 
     onMount(() => {
-   
-        check();
+        checkToken();
     });
 
 
-    async function check() {
+    async function checkToken() {
         const accessTokenString = sessionStorage.getItem('accessToken');
         
         if (accessTokenString) {
@@ -462,11 +460,9 @@ async function deleteReviewedReservations() {
     window.location.reload();
 }
 
-
 </script>
 
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14 mt-[80px]">
-    
     {#if $imagesLoaded && afterToday.length !== 0}
         <Card class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mb-28 mt-16">
             <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-3 lg:col-span-3 mb-8">Places that you reserved</h1>
@@ -530,22 +526,22 @@ async function deleteReviewedReservations() {
                 </div>  
               {/each}
 
-              <p class="text-center mt-5">Email of the place owner: {selectedPlace.authorEmail}</p>
-              <p class="text-center mt-5">Country: {selectedPlace.country}</p>
-              <p class="text-center mt-5">City: {selectedPlace.city}</p>
-              <p class="text-center mt-5">Adress: {selectedPlace.adress}</p>
+              <p class="text-center mt-5"><strong>Email of the place owner:</strong> {selectedPlace.authorEmail}</p>
+              <p class="text-center mt-5"><strong>Country:</strong> {selectedPlace.country}</p>
+              <p class="text-center mt-5"><strong>City:</strong> {selectedPlace.city}</p>
+              <p class="text-center mt-5"><strong>Adress:</strong> {selectedPlace.adress}</p>
               
-              <p class="text-center mt-5">Maximum number of people: {selectedPlace.maxPeople}</p>
-              <p class="text-center mt-5">Number of beds: {selectedPlace.beds}</p>
-              <p class="text-center mt-5">Number of adults: {selectedPlace.adults}</p>
+              <p class="text-center mt-5"><strong>Maximum number of people:</strong> {selectedPlace.maxPeople}</p>
+              <p class="text-center mt-5"><strong>Number of beds:</strong> {selectedPlace.beds}</p>
+              <p class="text-center mt-5"><strong>Number of adults:</strong> {selectedPlace.adults}</p>
               
 
-              <p class="text-center mt-5">Number of children: {selectedPlace.children}</p>
-              <p class="text-center mt-5">Are animals allowed?: {selectedPlace.animals}</p>
-              <p class="text-center mt-5">Is there a parking?: {selectedPlace.parking}</p>
+              <p class="text-center mt-5"><strong>Number of children:</strong> {selectedPlace.children}</p>
+              <p class="text-center mt-5"><strong>Are animals allowed?:</strong> {selectedPlace.animals}</p>
+              <p class="text-center mt-5"><strong>Is there a parking?:</strong> {selectedPlace.parking}</p>
 
-              <p class="text-center mt-5">Minimum nights per reservation: {selectedPlace.minNight}</p>
-              <p class="col-span-2 text-center mt-5">Description: {selectedPlace.description}</p>
+              <p class="text-center mt-5"><strong>Minimum nights per reservation:</strong> {selectedPlace.minNight}</p>
+              <p class="col-span-2 text-center mt-5"><strong>Description:</strong> {selectedPlace.description}</p>
 
               <p class="text-center col-span-2 text-3xl font-bold mt-12">Images of the place</p>
               {#if showImage}
@@ -574,30 +570,30 @@ async function deleteReviewedReservations() {
         <div class="absolute inset-0 flex justify-center items-center">
             <Card class="mt-[1300px] md:mt-[1000px] lg:mt-[1000px] grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
               <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2 mb-10">{selectedPlace.type} {selectedPlace.name}</h1>
+              <h1 class="text-3xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2 mb-2">Describe and rate the place you rented</h1>
               <Textarea bind:value={review} class="md:col-span-2 lg:col-span-2" {...textareaprops}/>
-              <div>
+              <div class="mb-3">
                 <Label class="text-white mb-1">Rate the place from 1 to 10</Label>
                 <Input bind:value={reviewGrade} type="number" min="1" max="10"/>
               </div>
-              <Button on:click={sendReview} disabled={reviewButton}>Send review</Button>
-              <Button on:click={deleteReviewedReservations}>hej</Button>
+              <Button color="blue" on:click={sendReview} disabled={reviewButton} class="mb-3">Send review</Button>
 
-              <p class="text-center mt-5">Email of the place owner: {selectedPlace.authorEmail}</p>
-              <p class="text-center mt-5">Country: {selectedPlace.country}</p>
-              <p class="text-center mt-5">City: {selectedPlace.city}</p>
-              <p class="text-center mt-5">Adress: {selectedPlace.adress}</p>
+              <p class="text-center mt-5"><strong>Email of the place owner:</strong> {selectedPlace.authorEmail}</p>
+              <p class="text-center mt-5"><strong>Country:</strong> {selectedPlace.country}</p>
+              <p class="text-center mt-5"><strong>City:</strong> {selectedPlace.city}</p>
+              <p class="text-center mt-5"><strong>Adress:</strong> {selectedPlace.adress}</p>
               
-              <p class="text-center mt-5">Maximum number of people: {selectedPlace.maxPeople}</p>
-              <p class="text-center mt-5">Number of beds: {selectedPlace.beds}</p>
-              <p class="text-center mt-5">Number of adults: {selectedPlace.adults}</p>
+              <p class="text-center mt-5"><strong>Maximum number of people:</strong> {selectedPlace.maxPeople}</p>
+              <p class="text-center mt-5"><strong>Number of beds:</strong> {selectedPlace.beds}</p>
+              <p class="text-center mt-5"><strong>Number of adults:</strong> {selectedPlace.adults}</p>
               
 
-              <p class="text-center mt-5">Number of children: {selectedPlace.children}</p>
-              <p class="text-center mt-5">Are animals allowed?: {selectedPlace.animals}</p>
-              <p class="text-center mt-5">Is there a parking?: {selectedPlace.parking}</p>
+              <p class="text-center mt-5"><strong>Number of children:</strong> {selectedPlace.children}</p>
+              <p class="text-center mt-5"><strong>Are animals allowed?:</strong> {selectedPlace.animals}</p>
+              <p class="text-center mt-5"><strong>Is there a parking?:</strong> {selectedPlace.parking}</p>
 
-              <p class="text-center mt-5">Minimum nights per reservation: {selectedPlace.minNight}</p>
-              <p class="col-span-2 text-center mt-5">Description: {selectedPlace.description}</p>
+              <p class="text-center mt-5"><strong>Minimum nights per reservation:</strong> {selectedPlace.minNight}</p>
+              <p class="col-span-2 text-center mt-5"><strong>Description:</strong> {selectedPlace.description}</p>
 
               <p class="text-center col-span-2 text-3xl font-bold mt-12">Images of the place</p>
               {#if showImage}
@@ -611,7 +607,6 @@ async function deleteReviewedReservations() {
                   </button>
                 </div>
               {/if}
-
 
               <Button color="blue" on:click={closeDialogSecondCard}>
                 Close</Button>

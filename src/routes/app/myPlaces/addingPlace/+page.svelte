@@ -1,17 +1,15 @@
 <script lang="ts">
-    import {Card, Button, Label, Select, Input, Textarea, Fileupload, Listgroup, ListgroupItem, Checkbox  } from 'flowbite-svelte';
-    import { onMount, afterUpdate  } from 'svelte';
+    import {Card, Button, Label, Select, Input, Textarea, Checkbox  } from 'flowbite-svelte';
+    import { onMount } from 'svelte';
     import { v4 as uuidv4 } from 'uuid';
-    import { app, storage } from '../../../../firebase';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+    import { storage } from '../../../../firebase';
+    import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
-    import {CalendarMonthSolid, EuroSolid} from 'flowbite-svelte-icons';
+    import {CalendarMonthSolid} from 'flowbite-svelte-icons';
 
 
-    
-
-    let selectedDate: string = "";
+  let selectedDate: string = "";
   let isLastInputFilled: boolean = false;
   let counter: number = 1;
   let dateInputs: { id: number; date: string; price: string }[] = [{ id: 1, date: "", price: "" }];
@@ -54,7 +52,7 @@ const getDisabledDates = (excludeId: number) => {
 
   onMount(() => {
       initializeFlatpickr('#datepicker', 1);
-      check();
+      checkToken();
   });
 
   const addDateInput = () => {
@@ -102,7 +100,44 @@ const getDisabledDates = (excludeId: number) => {
     review: "",
   };
 
-  async function check() {
+  let countries = [
+        { value: 'Apartment', name: 'Apartment' },
+        { value: 'Villa', name: 'Villa' },
+        { value: 'Hotel', name: 'Hotel' },
+        { value: 'Motel', name: 'Motel' },
+        { value: 'Hostel', name: 'Hostel' },
+        { value: 'Resort', name: 'Resort' },
+        { value: 'Cabin', name: 'Cabin' },
+        { value: 'Cottage', name: 'Cottage' }
+    ];
+
+  let animals = [
+      { value: 'Yes', name: 'Yes' },
+      { value: 'No', name: 'No' }
+  ];
+
+  let parking = [
+      { value: 'Yes. It is free.', name: 'Yes. It is free.' },
+      { value: 'Yes. You need to pay the parking.', name: 'Yes. You need to pay the parking.' },
+      { value: 'No.', name: 'No.' },
+  ];
+
+  let textareaprops = {
+      id: 'message',
+      name: 'message',
+      label: 'Your message',
+      rows: 4,
+      placeholder: 'Add a description for your place'
+  };
+
+  let files: FileList;
+
+  let imagePreviews: { id: number; src: string; file: File }[] = [];
+  let previewIdCounter = 0;
+  let valid: boolean = false;
+
+
+  async function checkToken() {
     const accessTokenString = sessionStorage.getItem('accessToken');
     
     if (accessTokenString) {
@@ -133,50 +168,7 @@ const getDisabledDates = (excludeId: number) => {
     }
   }
 
-    let countries = [
-        { value: 'Apartment', name: 'Apartment' },
-        { value: 'Villa', name: 'Villa' },
-        { value: 'Hotel', name: 'Hotel' },
-        { value: 'Motel', name: 'Motel' },
-        { value: 'Hostel', name: 'Hostel' },
-        { value: 'Resort', name: 'Resort' },
-        { value: 'Cabin', name: 'Cabin' },
-        { value: 'Cottage', name: 'Cottage' }
-    ];
-
-    let animals = [
-        { value: 'Yes', name: 'Yes' },
-        { value: 'No', name: 'No' }
-    ];
-
-    let parking = [
-        { value: 'Yes. It is free.', name: 'Yes. It is free.' },
-        { value: 'Yes. You need to pay the parking.', name: 'Yes. You need to pay the parking.' },
-        { value: 'No.', name: 'No.' },
-    ];
-
-    let textareaprops = {
-        id: 'message',
-        name: 'message',
-        label: 'Your message',
-        rows: 4,
-        placeholder: 'Add a description for your place'
-    };
-
-    
-    let fileuploadprops = {
-        id: 'user_avatar'
-    };
-
-    let fileuploadprops2 = {
-        id: 'user_avatar2'
-    };
-
-    let files: FileList;
-
-    let imagePreviews: { id: number; src: string; file: File }[] = [];
-  let previewIdCounter = 0;
-
+   
   function handleFileUpload() {
     if (files) {
       const newPreviews = Array.from(files).map((file) => ({
@@ -205,12 +197,6 @@ const getDisabledDates = (excludeId: number) => {
     fileInput?.click();
   }
 
-  
-  
-
-  let valid: boolean = false;
-
-  
 
 const addPlace = async () => {
     try {
@@ -299,7 +285,6 @@ const handleSecondInput = (event: Event, id: number) => {
     isFormValid();
 };
 
-
 </script>
  
 
@@ -367,7 +352,7 @@ const handleSecondInput = (event: Event, id: number) => {
   
   
   <Card class="max-w-xl bg-berkeley-blue text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
-      <h1 class="text-xl font-bold">Upload multiple images. At least n.</h1>
+      <h1 class="text-xl font-bold">Upload multiple images. At least 5.</h1>
 
       <div class="mt-6 mb-6">
         <button class="bg-blue-500 text-white px-4 py-2 rounded" on:click={openFileInput}>

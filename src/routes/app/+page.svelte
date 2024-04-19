@@ -1,13 +1,12 @@
 <script lang="ts">
-    import {Card, Button, Input, Search} from 'flowbite-svelte';
-    import {HomeSolid, CalendarMonthSolid, UsersSolid, SearchOutline } from 'flowbite-svelte-icons';
+    import {Card, Button, Input} from 'flowbite-svelte';
+    import {SearchOutline } from 'flowbite-svelte-icons';
     import { onMount} from 'svelte';
     import { writable } from 'svelte/store';
     import { storage } from '../../firebase';
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
-	import { stringify } from 'postcss';
 
   interface Place {
     id: number;
@@ -41,12 +40,12 @@ let filteredPlaces: Place[] = [];
 
 let selectedPlace: Place | null = null;
 let showImage:boolean = false;
+let currentIndex = 0;
 
 const imagesLoaded = writable(false);
 let isOpen = false;
 // @ts-ignore
 let fp;
-
 
 
 let dateRangesPrice: { from: string; to: string; price: string }[]
@@ -65,12 +64,9 @@ let reviewCheck: boolean = false;
 let reviews: string[] = [];
 
 
-  onMount(() => {
-
-    getAllPlacesForCurrentUser();
-    
-   
-  });
+onMount(() => {
+  getAllPlacesForCurrentUser();
+});
 
 async function getAllPlacesForCurrentUser() {
     try {
@@ -237,7 +233,6 @@ function extractDatesFromRanges(dateRanges: { from: string, to: string }[]): str
     if(reviews.length != 0){
       reviewCheck = true;
     }
-
 }
 
 async function openDialog(place: Place) {
@@ -317,7 +312,6 @@ async function openDialog(place: Place) {
         });
     }
       });
-
 }
 
 function closeDialog() {
@@ -334,9 +328,8 @@ function closeDialog() {
     isOpen = false;
     showImage = false;
     reviewCheck = false;
-  }
+}
 
-  let currentIndex = 0;
 
 function goToPrev() {
   if (selectedPlace?.images) {
@@ -440,7 +433,7 @@ function calculateTotalPrice() {
 }
 
 
-async function check() {
+async function checkToken() {
     const accessTokenString = sessionStorage.getItem('accessToken');
     
     if (accessTokenString) {
@@ -524,13 +517,13 @@ function searchForPlace(){
   if(childrenNumber != undefined){
     filteredPlaces = filteredPlaces.filter(place => place.children == childrenNumber);
   }
-
   //console.log(filteredPlaces);
 }
 </script>
  
 <div id="mainDiv" class="flex justify-center items-center grid grid-flow-row auto-rows-max gap-14">
   <Card class="mt-32 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 text-center">
+    <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-4 lg:col-span-4 mb-5">Filter the places and view below the catalog</h1>
     <form class="flex gap-2 col-span-2">
       <Input size="md" placeholder="Country" bind:value = {country}/>
       <Input size="md" placeholder="City" bind:value = {city}/>
@@ -596,6 +589,7 @@ function searchForPlace(){
   {#if filteredPlaces.length !== 0}
     <Card class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-berkeley-blue max-w-6xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600 mt-16 mb-28">
       {#if $imagesLoaded}
+      <h1 class="text-4xl font-bold text-center col-span-1 md:col-span-3 lg:col-span-3 mb-5">Catalog of places</h1>
         {#each filteredPlaces as place (place.id)}
               <div on:click={() => openDialog(place)} role="button" tabindex="0" on:keydown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -615,9 +609,9 @@ function searchForPlace(){
   </Card>
 {/if}
 
-{#if isOpen}
-  <div class="h-[650px]">
-  </div>
+  {#if isOpen}
+    <div class="h-[650px]">
+    </div>
   {/if}
 </div>
 
@@ -629,21 +623,21 @@ function searchForPlace(){
             <Card class="mt-[1800px] md:mt-[1200px] lg:mt-[1200px] grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
               <h1 class="text-4xl font-bold text-center col-span-2 md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
-              <p class="text-center mt-5">Country: {selectedPlace.country}</p>
-              <p class="text-center mt-5">City: {selectedPlace.city}</p>
-              <p class="text-center mt-5">Adress: {selectedPlace.adress}</p>
+              <p class="text-center mt-5"><strong>Country:</strong> {selectedPlace.country}</p>
+              <p class="text-center mt-5"><strong>City:</strong> {selectedPlace.city}</p>
+              <p class="text-center mt-5"><strong>Adress:</strong> {selectedPlace.adress}</p>
               
-              <p class="text-center mt-5">Maximum number of people: {selectedPlace.maxPeople}</p>
-              <p class="text-center mt-5">Number of beds: {selectedPlace.beds}</p>
-              <p class="text-center mt-5">Number of adults: {selectedPlace.adults}</p>
+              <p class="text-center mt-5"><strong>Maximum number of people:</strong> {selectedPlace.maxPeople}</p>
+              <p class="text-center mt-5"><strong>Number of beds:</strong> {selectedPlace.beds}</p>
+              <p class="text-center mt-5"><strong>Number of adults:</strong> {selectedPlace.adults}</p>
               
 
-              <p class="text-center mt-5">Number of children: {selectedPlace.children}</p>
-              <p class="text-center mt-5">Are animals allowed?: {selectedPlace.animals}</p>
-              <p class="text-center mt-5">Is there a parking?: {selectedPlace.parking}</p>
+              <p class="text-center mt-5"><strong>Number of children:</strong> {selectedPlace.children}</p>
+              <p class="text-center mt-5"><strong>Are animals allowed?:</strong> {selectedPlace.animals}</p>
+              <p class="text-center mt-5"><strong>Is there a parking?:</strong> {selectedPlace.parking}</p>
 
-              <p class="text-center mt-5">Minimum nights per reservation: {selectedPlace.minNight}</p>
-              <p class="col-span-2 text-center mt-5">Description: {selectedPlace.description}</p>
+              <p class="text-center mt-5"><strong>Minimum nights per reservation:</strong> {selectedPlace.minNight}</p>
+              <p class="col-span-2 text-center mt-5"><strong>Description:</strong> {selectedPlace.description}</p>
 
               <p class="text-center col-span-2 text-3xl font-bold mt-12">Images of the place</p>
               {#if showImage}
@@ -662,7 +656,7 @@ function searchForPlace(){
 
               <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
               <p>Total price: {totalPrice}€</p>
-              <Button href="/app/journeyLog" on:click={check} disabled={!reserveBool}>
+              <Button href="/app/journeyLog" on:click={checkToken} disabled={!reserveBool}>
                 Reserve
               </Button>
 
@@ -678,11 +672,3 @@ function searchForPlace(){
         </div>
   {/if}
 {/if}
-
- 
-  
-  
-  
-    
-  
-  
