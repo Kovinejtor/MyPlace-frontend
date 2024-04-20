@@ -2,6 +2,8 @@
   import { Label, Input, Card, Button, Helper, Select} from 'flowbite-svelte';
   import { EnvelopeSolid, LockSolid, MobilePhoneSolid, AddressCardSolid, MapPinAltSolid, EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import '../../app.pcss';
+  import { goto } from '$app/navigation';
+
 
   let show = false;
   let show1 = false;
@@ -80,7 +82,6 @@
 
   const handleSubmit = () => {
     if (!isButtonDisabled) {
-      window.location.href = '/app';
       createUser();
     }
   };
@@ -101,6 +102,7 @@
         const result = await response.json();
         console.log('Account created successfully:', result);
         sessionStorage.setItem('accessToken', JSON.stringify(result));
+        goto('/app');
       } else {
         console.log("this", registrationData);
         console.error('Failed to create account:', response.statusText);
