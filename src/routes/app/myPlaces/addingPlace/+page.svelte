@@ -7,6 +7,7 @@
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
     import {CalendarMonthSolid} from 'flowbite-svelte-icons';
+    import { goto } from '$app/navigation';
 
 
   let selectedDate: string = "";
@@ -227,6 +228,7 @@ const addPlace = async () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Place created successfully:', result);
+        goto('/app');
       } else {
         console.error('Failed to create place:', response.statusText);
       }
@@ -235,9 +237,6 @@ const addPlace = async () => {
     }
   };
 
-  const handleSubmit = () => {
-    addPlace();
-  };
 
   const isFormValid = () => {
     if (
@@ -364,7 +363,7 @@ const handleSecondInput = (event: Event, id: number) => {
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-4">
         {#each imagePreviews as { id, src }, i (id)}
         <div class="relative group">
-          <img src={src} alt={`Preview ${i}`} class="w-full h-32 object-cover rounded mb-2">
+          <img src={src} alt={`Preview ${i}`} class="w-full md:h-32 lg:h-32 h-18 object-cover rounded mb-2">
           <div
             class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             role="button"
@@ -420,7 +419,7 @@ const handleSecondInput = (event: Event, id: number) => {
     <div class="items-center text-center">
       <Checkbox class="mt-14 text-white" color="blue" on:click={changeAgree}>By adding my place to the catalog I agree that it will be visible to other people.</Checkbox>
         {#if valid && agree}
-          <Button href="/app" on:click={handleSubmit} color="blue" class="mt-8 w-56" disabled={!valid}>Add place</Button>
+          <Button on:click={addPlace} color="blue" class="mt-8 w-56" disabled={!valid}>Add place</Button>
         {:else}
             <Button color="blue" class="mt-8 w-56" disabled={!valid || !agree}>Add place</Button>
         {/if}

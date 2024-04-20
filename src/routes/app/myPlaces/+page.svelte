@@ -6,6 +6,8 @@
     import { writable } from 'svelte/store';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
+    import { goto } from '$app/navigation';
+
     
 
     let count : number;
@@ -305,7 +307,7 @@ function renderDialog() {
             const img = document.createElement('img');
             img.src = imageURL;
             img.alt = 'Image';
-            img.classList.add('w-full', 'h-48');
+            img.classList.add('w-full', 'md:h-32', 'lg:h-32', 'h-18');
             imageWrapper.appendChild(img);
 
             const deleteButton = document.createElement('button');
@@ -436,6 +438,7 @@ function addDisabled(id: number){
 
                 if (updateResponse.ok) {
                     console.log('Place updated successfully');
+                    goto('/app');
                 } else {
                     console.error('Failed to update place:', updateResponse.statusText);
                 }
@@ -523,6 +526,7 @@ async function deletePlace(placeId: number, folderName: string): Promise<void> {
     }
 
     console.log('Place deleted successfully');
+    goto('/app');
   } catch (error) {
     console.error('Error deleting place:', error);
   }
@@ -620,7 +624,7 @@ function convertReservation() {
 {#if isOpen}
     {#if selectedPlace}
         <div class="absolute inset-0 flex justify-center items-center">
-            <Card class="mt-[1300px] md:mt-[1400px] lg:mt-[1400px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
+            <Card class="mt-[1600px] md:mt-[1400px] lg:mt-[1400px] grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 md:gap-4 lg:gap-4 bg-berkeley-blue max-w-2xl text-white shadow-2xl drop-shadow-lg border-2 border-sky-600">
                 <h1 class="text-4xl font-bold text-center md:col-span-2 lg:col-span-2">{selectedPlace.type} {selectedPlace.name}</h1>
 
                 <p class="md:col-span-2 lg:col-span-2 text-center mt-8 text-2xl font-bold">Reservations:</p>

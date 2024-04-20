@@ -7,6 +7,7 @@
     import { ref, getDownloadURL, listAll, getMetadata} from 'firebase/storage';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/flatpickr.css';
+    import { goto } from '$app/navigation';
 
   interface Place {
     id: number;
@@ -62,7 +63,6 @@ let childrenNumber: number;
 let reviewCheck: boolean = false;
 
 let reviews: string[] = [];
-
 
 onMount(() => {
   getAllPlacesForCurrentUser();
@@ -490,6 +490,7 @@ async function checkToken() {
     }
 
     console.log('Reservation updated successfully');
+    goto('/app/journeyLog');
   } catch (error) {
     console.error('Error updating reservation:', error);
   }
@@ -642,7 +643,7 @@ function searchForPlace(){
               <p class="text-center col-span-2 text-3xl font-bold mt-12">Images of the place</p>
               {#if showImage}
                 <div class="relative col-span-2">
-                  <img src={selectedPlace.images[currentIndex]} class="w-[1200px] h-96" alt="">
+                  <img src={selectedPlace.images[currentIndex]} class="w-[1200px] md:h-96 lg:h-96 h-64" alt="">
                   <button on:click={goToPrev} class="absolute top-1/2 left-4 transform -translate-y-1/2 w-12 h-12 bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
                     &lt;
                   </button>
@@ -656,7 +657,7 @@ function searchForPlace(){
 
               <Input id="dateInput" placeholder="Select Date" on:input={calculateTotalPrice}/>
               <p>Total price: {totalPrice}€</p>
-              <Button href="/app/journeyLog" on:click={checkToken} disabled={!reserveBool}>
+              <Button on:click={checkToken} disabled={!reserveBool}>
                 Reserve
               </Button>
 
